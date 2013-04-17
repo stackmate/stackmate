@@ -48,6 +48,14 @@ class SecurityGroup < Ruote::Participant
   end
 end
 
+class Finisher < Ruote::Participant
+  def on_workitem
+    p workitem.fields.keys
+    p 'done'
+    reply
+  end
+end
+
 
 class Stacker
     @@class_map = { "AWS::EC2::Instance" => "Instance",
@@ -59,7 +67,7 @@ class Stacker
         @stackid = stackid
         @engine = Ruote::Dashboard.new(
           Ruote::Worker.new(
-            Ruote::FsStorage.new('stacker_work')))
+            Ruote::FsStorage.new('stacker_work_' + @stackid.to_s())))
 
         @engine.noisy = ENV['NOISY'] == 'true'
         @stack = {}
@@ -76,29 +84,28 @@ class Stacker
         participants = []
         @templ['Resources'].keys.each do |k|
             t = @templ['Resources'][k]['Type']
-            if ! @resources.has_key?(t)
-                @resources[t] = []
-            end
-            @resources[t] << k
+            #for each type of resource, build a list of instances of that resource
+            (@resources[t] ||= [])  << k
             @engine.register_participant k, @@class_map[t]
+            #one participant per resource instance. FIXME: needs to be ordered
             participants << k
         end
-        @pdef = Ruote.define 'mydef'+@stackid.to_s() do
+        @engine.register_participant 'finisher', 'Finisher'
+        participants << 'finisher'
+        p participants
+        @pdef = Ruote.define 'mydef'+ @stackid.to_s() do
             cursor do
                 participants.collect{ |name| __send__(name) }
             end
         end
-        p @pdef
     end
     
     def launch()
-        wfid = @engine.launch(
-        @pdef,
-        @params)
+        wfid = @engine.launch( @pdef, @templ)
         @engine.wait_for(wfid)
     end
 end
 
 
-p = Stacker.new('LAMP_Single_Instance.template', 1)
+p = Stacker.new('LAMP_Single_Instance.template', 3)
 p.launch()
