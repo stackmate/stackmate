@@ -4,6 +4,50 @@ require 'ruote'
 require 'ruote/storage/fs_storage'
 require 'json'
 
+class Instance < Ruote::Participant
+  def on_workitem
+    sleep(rand)
+    result =
+      [ workitem.participant_name, (20 * rand + 1).to_i ]
+    (workitem.fields['spotted'] ||= []) << result
+    p result
+    reply
+  end
+end
+
+class WaitConditionHandle < Ruote::Participant
+  def on_workitem
+    sleep(rand)
+    result =
+      [ workitem.participant_name, (40 * rand + 1).to_i ]
+    (workitem.fields['spotted'] ||= []) << result
+    p result
+    reply
+  end
+end
+
+class WaitCondition < Ruote::Participant
+  def on_workitem
+    sleep(rand)
+    result =
+      [ workitem.participant_name, (40 * rand + 1).to_i ]
+    (workitem.fields['spotted'] ||= []) << result
+    p result
+    reply
+  end
+end
+
+class SecurityGroup < Ruote::Participant
+  def on_workitem
+    sleep(rand)
+    result =
+      [ workitem.participant_name, (40 * rand + 1).to_i ]
+    (workitem.fields['spotted'] ||= []) << result
+    p result
+    reply
+  end
+end
+
 
 class Stacker
     @@class_map = { "AWS::EC2::Instance" => "Instance",
@@ -44,6 +88,7 @@ class Stacker
                 participants.collect{ |name| __send__(name) }
             end
         end
+        p @pdef
     end
     
     def launch()
