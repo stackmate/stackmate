@@ -3,14 +3,20 @@ require 'rufus-json/automatic'
 require 'ruote'
 require 'ruote/storage/fs_storage'
 require 'json'
+require 'cloudstack_ruby_client'
+require 'set'
 
 class Instance < Ruote::Participant
+  URL = 'http://192.168.56.10:8080/client/api/'
+  APIKEY = 'yy0sfCPpyKnvREhgpeIWzXORIIvyteq_iCgFpKXnqpdbnHuoYiK78nprSggG4hcx-hxwW897nU-XvGB0Tq8YFw'
+  SECKEY = 'Pse4fqYNnr1xvoRXlAe8NQKCSXeK_VGdwUxUzyLEPVQ7B3cI1Q7B8jmZ42FQpz2jIICFax1foIzg2716lJFZVw'
+  def initialize()
+      @client = CloudstackRubyClient::Client.new(URL, APIKEY, SECKEY, false)
+  end
   def on_workitem
     sleep(rand)
-    result =
-      [ workitem.participant_name, (20 * rand + 1).to_i ]
-    (workitem.fields['spotted'] ||= []) << result
-    p result
+    p workitem.fields['Resources'][workitem.participant_name]['Properties']
+    #@client.listNetworkOfferings()
     reply
   end
 end
@@ -70,6 +76,7 @@ class Stacker
             Ruote::FsStorage.new('stacker_work_' + @stackid.to_s())))
 
         @engine.noisy = ENV['NOISY'] == 'true'
+        #@engine.noisy = true
         @stack = {}
         @resources = {}
         stackstr = File.read(templatefile)
@@ -77,8 +84,31 @@ class Stacker
         #resolve_param_refs
         #order_resources
         @params = @templ['Parameters']
+        @deps = {}
+        @templ['Resources'].each { |key,val| deps = Set.new; find_refs(key, val, deps); @deps[key] = deps.to_a}
+        p @deps
         pdef()
     end
+
+    def find_refs (parent, j, deps)
+        case j
+            when Array
+                j.each {|x| find_refs(parent, x, deps)}
+            when Hash
+                j.keys.each do |k|
+                    if k == "Ref"
+                        if !@params.keys.index(j[k]) && j[k] != "AWS::Region" && j[k] != "AWS::StackId"
+                            print parent, ": ", j[k], "\n"
+                            deps << j[k]
+                        end
+                    else
+                        find_refs(parent, j[k], deps)
+                    end
+                end
+        end
+        return deps
+    end
+
 
     def pdef()
         participants = []
