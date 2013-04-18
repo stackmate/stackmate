@@ -5,6 +5,7 @@ require 'ruote/storage/fs_storage'
 require 'json'
 require 'cloudstack_ruby_client'
 require 'set'
+require 'tsort'
 
 class Instance < Ruote::Participant
   URL = 'http://192.168.56.10:8080/client/api/'
@@ -64,6 +65,7 @@ end
 
 
 class Stacker
+    include TSort
     @@class_map = { "AWS::EC2::Instance" => "Instance",
               "AWS::CloudFormation::WaitConditionHandle" => "WaitConditionHandle",
               "AWS::CloudFormation::WaitCondition" => "WaitCondition",
@@ -86,7 +88,7 @@ class Stacker
         @params = @templ['Parameters']
         @deps = {}
         @templ['Resources'].each { |key,val| deps = Set.new; find_refs(key, val, deps); @deps[key] = deps.to_a}
-        p @deps
+        p self.strongly_connected_components
         pdef()
     end
 
@@ -109,6 +111,13 @@ class Stacker
         return deps
     end
 
+    def tsort_each_node(&block)
+        @deps.each_key(&block)
+    end
+
+    def tsort_each_child(name, &block)
+        @deps[name].each(&block) if @deps.has_key?(name)
+    end
 
     def pdef()
         participants = []
