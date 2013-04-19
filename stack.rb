@@ -6,6 +6,7 @@ require 'cloudstack_ruby_client'
 require 'set'
 require 'tsort'
 require 'SecureRandom'
+require 'optparse'
 
 class Instance < Ruote::Participant
   URL = 'http://192.168.56.10:8080/client/api/'
@@ -68,7 +69,7 @@ class Stacker
         @stackid = stackid
         @engine = Ruote::Dashboard.new(
           Ruote::Worker.new(
-            Ruote::FsStorage.new('stacker_work_' + @stackid.to_s())))
+            Ruote::FsStorage.new(@stackid.to_s())))
 
         @engine.noisy = ENV['NOISY'] == 'true'
         #@engine.noisy = true
@@ -136,6 +137,35 @@ class Stacker
     end
 end
 
+options = {}
+stack_name = ''
+opt_parser = OptionParser.new do |opts|
+    opts.banner = "Usage: stack.rb STACK_NAME [options]"
+    opts.separator ""
+    opts.separator "Specific options:"
+    opts.on(:REQUIRED, "--template-file FILE", String, "Path to the file that contains the template") do |f|
+        options[:file] = f
+    end
+    opts.on("-h", "--help", "Show this message")  do
+        puts opts
+        exit
+    end
+end
 
-p = Stacker.new('LAMP_Two_Instance.template', SecureRandom.hex(3))
-p.launch()
+begin
+    opt_parser.parse!(ARGV)
+    if ARGV.size == 1
+        stack_name = ARGV[0]
+    end
+rescue => e
+    puts e.message.capitalize 
+    puts opt_parser.help()
+    exit 1
+end
+
+if options[:file] && stack_name != ''
+    p = Stacker.new(options[:file], stack_name + '_' + SecureRandom.hex(3))
+    p.launch()
+else 
+    puts opt_parser.help()
+end
