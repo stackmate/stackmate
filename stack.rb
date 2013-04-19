@@ -17,7 +17,7 @@ class Stacker
         @stackid = stackid
         @engine = Ruote::Dashboard.new(
           Ruote::Worker.new(
-            Ruote::FsStorage.new(@stackid.to_s())))
+            Ruote::FsStorage.new('work/' + @stackid.to_s())))
 
         @engine.noisy = ENV['NOISY'] == 'true'
         #@engine.noisy = true
@@ -28,9 +28,17 @@ class Stacker
         #resolve_param_refs
         #order_resources
         @params = @templ['Parameters']
-        @deps = {}
-        @templ['Resources'].each { |key,val| deps = Set.new; find_refs(key, val, deps); @deps[key] = deps.to_a}
+        resolve_dependencies()
         pdef()
+    end
+
+    def resolve_dependencies()
+        @deps = {}
+        @templ['Resources'].each { 
+            |key,val| deps = Set.new
+            find_refs(key, val, deps)
+            @deps[key] = deps.to_a
+        }
     end
 
     def find_refs (parent, jsn, deps)
@@ -40,6 +48,7 @@ class Stacker
             when Hash
                 jsn.keys.each do |k|
                     if k == "Ref"
+                        #only resolve dependencies on other resources for now
                         if !@params.keys.index(jsn[k]) && jsn[k] != "AWS::Region" && jsn[k] != "AWS::StackId"
                             deps << jsn[k]
                             #print parent, ": ", deps.to_a, "\n"
@@ -62,11 +71,9 @@ class Stacker
 
     def pdef()
         participants = self.strongly_connected_components.flatten
-        @templ['Resources'].keys.each do |k|
-            t = @templ['Resources'][k]['Type']
-            #for each type of resource, build a list of instances of that resource
-            (@resources[t] ||= [])  << k
-            @engine.register_participant k, @@class_map[t]
+        participants.each do |p|
+            t = @templ['Resources'][p]['Type']
+            @engine.register_participant p, @@class_map[t]
         end
         @engine.register_participant 'Output', 'Output'
         participants << 'Output'
