@@ -5,6 +5,7 @@ require 'json'
 require 'cloudstack_ruby_client'
 require 'set'
 require 'tsort'
+require 'SecureRandom'
 
 class Instance < Ruote::Participant
   URL = 'http://192.168.56.10:8080/client/api/'
@@ -15,8 +16,9 @@ class Instance < Ruote::Participant
   end
   def on_workitem
     sleep(rand)
-    p workitem.fields['Resources'][workitem.participant_name]['Properties']
+    #p workitem.fields['Resources'][workitem.participant_name]['Properties']
     #@client.listNetworkOfferings()
+    p workitem.participant_name
     reply
   end
 end
@@ -24,10 +26,7 @@ end
 class WaitConditionHandle < Ruote::Participant
   def on_workitem
     sleep(rand)
-    result =
-      [ workitem.participant_name, (40 * rand + 1).to_i ]
-    (workitem.fields['spotted'] ||= []) << result
-    p result
+    p workitem.participant_name
     reply
   end
 end
@@ -35,10 +34,7 @@ end
 class WaitCondition < Ruote::Participant
   def on_workitem
     sleep(rand)
-    result =
-      [ workitem.participant_name, (40 * rand + 1).to_i ]
-    (workitem.fields['spotted'] ||= []) << result
-    p result
+    p workitem.participant_name
     reply
   end
 end
@@ -46,18 +42,16 @@ end
 class SecurityGroup < Ruote::Participant
   def on_workitem
     sleep(rand)
-    result =
-      [ workitem.participant_name, (40 * rand + 1).to_i ]
-    (workitem.fields['spotted'] ||= []) << result
-    p result
+    p workitem.participant_name
     reply
   end
 end
 
-class Finisher < Ruote::Participant
+class Output < Ruote::Participant
   def on_workitem
-    p workitem.fields.keys
-    p 'done'
+    #p workitem.fields.keys
+    p workitem.participant_name
+    p "Done"
     reply
   end
 end
@@ -87,7 +81,6 @@ class Stacker
         @params = @templ['Parameters']
         @deps = {}
         @templ['Resources'].each { |key,val| deps = Set.new; find_refs(key, val, deps); @deps[key] = deps.to_a}
-        p self.strongly_connected_components
         pdef()
     end
 
@@ -99,8 +92,8 @@ class Stacker
                 jsn.keys.each do |k|
                     if k == "Ref"
                         if !@params.keys.index(jsn[k]) && jsn[k] != "AWS::Region" && jsn[k] != "AWS::StackId"
-                            print parent, ": ", jsn[k], "\n"
                             deps << jsn[k]
+                            #print parent, ": ", deps.to_a, "\n"
                         end
                     else
                         find_refs(parent, jsn[k], deps)
@@ -119,23 +112,22 @@ class Stacker
     end
 
     def pdef()
-        participants = []
+        participants = self.strongly_connected_components.flatten
         @templ['Resources'].keys.each do |k|
             t = @templ['Resources'][k]['Type']
             #for each type of resource, build a list of instances of that resource
             (@resources[t] ||= [])  << k
             @engine.register_participant k, @@class_map[t]
-            #one participant per resource instance. FIXME: needs to be ordered
-            participants << k
         end
-        @engine.register_participant 'finisher', 'Finisher'
-        participants << 'finisher'
-        p participants
+        @engine.register_participant 'Output', 'Output'
+        participants << 'Output'
+        print "Ordered list of participants: ",  participants, "\n"
         @pdef = Ruote.define 'mydef'+ @stackid.to_s() do
             cursor do
                 participants.collect{ |name| __send__(name) }
             end
         end
+        #p @pdef
     end
     
     def launch()
@@ -145,5 +137,5 @@ class Stacker
 end
 
 
-p = Stacker.new('LAMP_Single_Instance.template', 3)
+p = Stacker.new('LAMP_Two_Instance.template', SecureRandom.hex(3))
 p.launch()
