@@ -1,4 +1,3 @@
-
 require 'rufus-json/automatic'
 require 'ruote'
 require 'ruote/storage/fs_storage'
@@ -92,19 +91,19 @@ class Stacker
         pdef()
     end
 
-    def find_refs (parent, j, deps)
-        case j
+    def find_refs (parent, jsn, deps)
+        case jsn
             when Array
-                j.each {|x| find_refs(parent, x, deps)}
+                jsn.each {|x| find_refs(parent, x, deps)}
             when Hash
-                j.keys.each do |k|
+                jsn.keys.each do |k|
                     if k == "Ref"
-                        if !@params.keys.index(j[k]) && j[k] != "AWS::Region" && j[k] != "AWS::StackId"
-                            print parent, ": ", j[k], "\n"
-                            deps << j[k]
+                        if !@params.keys.index(jsn[k]) && jsn[k] != "AWS::Region" && jsn[k] != "AWS::StackId"
+                            print parent, ": ", jsn[k], "\n"
+                            deps << jsn[k]
                         end
                     else
-                        find_refs(parent, j[k], deps)
+                        find_refs(parent, jsn[k], deps)
                     end
                 end
         end
