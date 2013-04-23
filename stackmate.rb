@@ -11,6 +11,10 @@ opt_parser = OptionParser.new do |opts|
     opts.on(:REQUIRED, "--template-file FILE", String, "Path to the file that contains the template") do |f|
         options[:file] = f
     end
+    opts.on("-p", "--parameters [KEY1=VALUE1 KEY2=VALUE2..]", "Parameter values used to create the stack.") do |p|
+        options[:params] = p
+        puts p
+    end
     opts.on("-h", "--help", "Show this message")  do
         puts opts
         exit
@@ -29,8 +33,13 @@ rescue => e
 end
 
 if options[:file] && stack_name != ''
-    p = Stacker.new(options[:file], stack_name)
-    p.launch()
+    unresolved = catch(:unresolved) do
+        p = Stacker.new(options[:file], stack_name, options[:params])
+        p.launch()
+    end
+    if unresolved.kind_of? Array
+        puts 'Failed to resolve parameters ' + unresolved.to_s
+    end
 else 
     puts opt_parser.help()
 end

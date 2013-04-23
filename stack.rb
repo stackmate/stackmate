@@ -13,50 +13,71 @@ class Stacker
               'AWS::CloudFormation::WaitCondition' => 'WaitCondition',
               'AWS::EC2::SecurityGroup' => 'SecurityGroup'}
 
-    def initialize(templatefile, stackname)
+    def initialize(templatefile, stackname, params)
         @stackname = stackname
-        p stackname
+        @resolved = {}
+        stackstr = File.read(templatefile)
+        @templ = JSON.parse(stackstr) 
+        @templ['StackName'] = @stackname
+        @param_names = @templ['Parameters']
         @engine = Ruote::Dashboard.new(
           Ruote::Worker.new(
             Ruote::FsStorage.new('work/' + @stackname.to_s())))
 
         @engine.noisy = ENV['NOISY'] == 'true'
-        #@engine.noisy = true
-        @stack = {}
-        @resources = {}
-        stackstr = File.read(templatefile)
-        @templ = JSON.parse(stackstr) 
-        #resolve_param_refs
-        #order_resources
-        @params = @templ['Parameters']
+        @deps = {}
+        @pdeps = {}
+        resolve_param_refs(params)
+        validate_param_values
         resolve_dependencies()
-        @templ['StackName'] = @stackname
+        @templ['ResolvedNames'] = @resolved
         pdef()
     end
 
-    def resolve_dependencies
-        @deps = {}
-        @templ['Resources'].each { |key,val| 
-            deps = Set.new
-            find_refs(key, val, deps)
-            @deps[key] = deps.to_a
-        }
+    def resolve_param_refs(params)
+        params.split(';').each do |p|
+           i = p.split('=')
+           @resolved[i[0]] = i[1]
+        end
+    end
+    
+    def validate_param_values
     end
 
-    def find_refs (parent, jsn, deps)
+    def resolve_dependencies
+        @templ['Resources'].each { |key,val| 
+            deps = Set.new
+            pdeps = Set.new
+            find_refs(key, val, deps, pdeps)
+            @deps[key] = deps.to_a
+            @pdeps[key] = pdeps.to_a
+        }
+        @pdeps.keys.each do |k|
+            if ! (@pdeps[k] - @resolved.keys).empty?
+                throw :unresolved, (@pdeps[k] - @resolved.keys)
+            end
+        end
+    end
+
+    def find_refs (parent, jsn, deps, pdeps)
         case jsn
             when Array
-                jsn.each {|x| find_refs(parent, x, deps)}
+                jsn.each {|x| find_refs(parent, x, deps, pdeps)}
+                #print parent, ": ", jsn, "\n"
             when Hash
                 jsn.keys.each do |k|
+                    #TODO Fn::GetAtt
                     if k == "Ref"
                         #only resolve dependencies on other resources for now
-                        if !@params.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId'
+                        if !@param_names.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId'
                             deps << jsn[k]
                             #print parent, ": ", deps.to_a, "\n"
+                        else if @param_names.keys.index(jsn[k])
+                            pdeps << jsn[k]
+                        end
                         end
                     else
-                        find_refs(parent, jsn[k], deps)
+                        find_refs(parent, jsn[k], deps, pdeps)
                     end
                 end
         end
@@ -81,7 +102,6 @@ class Stacker
         participants << 'Output'
         print 'Ordered list of participants: ',  participants, "\n"
         @pdef = Ruote.define @stackname.to_s() do
-            set 'f:stack_name' => @stackname
             cursor do
                 participants.collect{ |name| __send__(name) }
             end

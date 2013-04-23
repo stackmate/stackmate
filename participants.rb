@@ -23,20 +23,40 @@ end
 
 class Instance < CloudStackResource
   def on_workitem
-    p workitem.participant_name
+    myname = workitem.participant_name
+    resolved = workitem.fields['ResolvedNames']
     sleep(rand)
     args0 = workitem.fields['Resources'][workitem.participant_name]['Properties']
-    #p args0
+    security_group_names = []
+    args0['SecurityGroups'].each do |sg| 
+        sg_name = resolved[sg['Ref']]
+        security_group_names << sg_name
+    end
+    keypair = nil
+    if args0['KeyName']
+        keypair = resolved[args0['KeyName']['Ref']]
+    end
     args = { 'serviceofferingid' => '13954c5a-60f5-4ec8-9858-f45b12f4b846',
              'templateid' => '7fc2c704-a950-11e2-8b38-0b06fbda5106',
-             'zoneid' => '1',
-             'securitygroupnames' => 'WebServerSecurityGroup',
+             'zoneid' => default_zone_id,
+             'securitygroupnames' => security_group_names.join(','),
              'userdata' => 'abc',
-             'displayname' => workitem.participant_name,
-             'keypair' => 'mykeypair'
+             'displayname' => myname
     }
+    if keypair
+        args['keypair'] = keypair
+    end
+
     @client.deployVirtualMachine(args)
     reply
+  end
+
+  def default_zone_id
+      '1'
+  end
+
+  def default_zone_id
+      '1'
   end
 end
 
@@ -58,22 +78,28 @@ end
 
 class SecurityGroup < CloudStackResource
   def on_workitem
-    p workitem.participant_name
+    myname = workitem.participant_name
+    resolved = workitem.fields['ResolvedNames']
     sleep(rand)
-    props = workitem.fields['Resources'][workitem.participant_name]['Properties']
+    props = workitem.fields['Resources'][myname]['Properties']
     name = workitem.fields['StackName'] + '-' + workitem.participant_name;
-    #FIXME: workaround bug in cloudstack_ruby_client. 
-    #Transform spaces in description into underscore
+    resolved[myname] = name
     args = { 'name' => name,
-             'description' => props['GroupDescription'].tr(' ', '_')
+             'description' => props['GroupDescription']
     }
     @client.createSecurityGroup(args)
     props['SecurityGroupIngress'].each do |rule|
+        cidrIp = rule['CidrIp']
+        if cidrIp.kind_of?  Hash
+            #TODO: some sort of validation
+            cidrIpName = cidrIp['Ref']
+            cidrIp = resolved[cidrIpName]
+        end
         args = { 'securitygroupname' => name,
             'startport' => rule['FromPort'],
             'endport' => rule['ToPort'],
             'protocol' => rule['IpProtocol'],
-            'cidrlist' => rule['CidrIp']
+            'cidrlist' => cidrIp
         }
         #TODO handle usersecuritygrouplist
         @client.authorizeSecurityGroupIngress(args)
