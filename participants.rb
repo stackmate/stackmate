@@ -7,6 +7,7 @@ require 'set'
 require 'tsort'
 require 'SecureRandom'
 require 'optparse'
+require 'Base64'
 
 class CloudStackResource < Ruote::Participant
   def initialize()
@@ -24,31 +25,51 @@ end
 class Instance < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
+    p myname
     resolved = workitem.fields['ResolvedNames']
     sleep(rand)
-    args0 = workitem.fields['Resources'][workitem.participant_name]['Properties']
+    props = workitem.fields['Resources'][workitem.participant_name]['Properties']
     security_group_names = []
-    args0['SecurityGroups'].each do |sg| 
+    props['SecurityGroups'].each do |sg| 
         sg_name = resolved[sg['Ref']]
         security_group_names << sg_name
     end
     keypair = nil
-    if args0['KeyName']
-        keypair = resolved[args0['KeyName']['Ref']]
+    if props['KeyName']
+        keypair = resolved[props['KeyName']['Ref']]
+    end
+    userdata = nil
+    if props['UserData']
+        userdata = user_data(props['UserData'], resolved)
     end
     args = { 'serviceofferingid' => '13954c5a-60f5-4ec8-9858-f45b12f4b846',
              'templateid' => '7fc2c704-a950-11e2-8b38-0b06fbda5106',
              'zoneid' => default_zone_id,
              'securitygroupnames' => security_group_names.join(','),
-             'userdata' => 'abc',
-             'displayname' => myname
+             'displayname' => myname,
+             #'name' => myname
     }
     if keypair
         args['keypair'] = keypair
     end
+    if userdata
+        args['userdata'] = userdata 
+        p userdata
+    end
 
     @client.deployVirtualMachine(args)
     reply
+  end
+
+  def user_data(datum, resolved)
+      #TODO make this more general purpose
+      actual = datum['Fn::Base64']['Fn::Join']
+      delim = actual[0]
+      data = actual[1].map { |d|
+          d.kind_of?(Hash) ? resolved[d['Ref']]: d
+      }
+      Base64.urlsafe_encode64(data.join(delim))
+
   end
 
   def default_zone_id
@@ -79,6 +100,7 @@ end
 class SecurityGroup < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
+    p myname
     resolved = workitem.fields['ResolvedNames']
     sleep(rand)
     props = workitem.fields['Resources'][myname]['Properties']
