@@ -49,6 +49,8 @@ class Stacker
             deps = Set.new
             pdeps = Set.new
             find_refs(key, val, deps, pdeps)
+            deps << val['DependsOn'] if val['DependsOn']
+            #print key, " depends on ", deps.to_a, "\n"
             @deps[key] = deps.to_a
             @pdeps[key] = pdeps.to_a
         }
@@ -58,6 +60,7 @@ class Stacker
             end
         end
     end
+
 
     def find_refs (parent, jsn, deps, pdeps)
         case jsn
