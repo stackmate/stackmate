@@ -1,4 +1,3 @@
-require 'SecureRandom'
 require 'optparse'
 require_relative 'stack'
 
@@ -30,7 +29,7 @@ rescue => e
 end
 
 if options[:file] && stack_name != ''
-    p = Stacker.new(options[:file], stack_name + '_' + SecureRandom.hex(3))
+    p = Stacker.new(options[:file], stack_name)
     p.launch()
 else 
     puts opt_parser.help()

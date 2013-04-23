@@ -8,18 +8,34 @@ require 'tsort'
 require 'SecureRandom'
 require 'optparse'
 
-class Instance < Ruote::Participant
-  URL = 'http://192.168.56.10:8080/client/api/'
-  APIKEY = 'yy0sfCPpyKnvREhgpeIWzXORIIvyteq_iCgFpKXnqpdbnHuoYiK78nprSggG4hcx-hxwW897nU-XvGB0Tq8YFw'
-  SECKEY = 'Pse4fqYNnr1xvoRXlAe8NQKCSXeK_VGdwUxUzyLEPVQ7B3cI1Q7B8jmZ42FQpz2jIICFax1foIzg2716lJFZVw'
+class CloudStackResource < Ruote::Participant
   def initialize()
-      @client = CloudstackRubyClient::Client.new(URL, APIKEY, SECKEY, false)
+      @url = ENV['URL']
+      @apikey = ENV['APIKEY']
+      @seckey = ENV['SECKEY']
+      @client = CloudstackRubyClient::Client.new(@url, @apikey, @seckey, false)
   end
   def on_workitem
-    sleep(rand)
-    #p workitem.fields['Resources'][workitem.participant_name]['Properties']
-    #@client.listNetworkOfferings()
     p workitem.participant_name
+    reply
+  end
+end
+
+class Instance < CloudStackResource
+  def on_workitem
+    p workitem.participant_name
+    sleep(rand)
+    args0 = workitem.fields['Resources'][workitem.participant_name]['Properties']
+    #p args0
+    args = { 'serviceofferingid' => '13954c5a-60f5-4ec8-9858-f45b12f4b846',
+             'templateid' => '7fc2c704-a950-11e2-8b38-0b06fbda5106',
+             'zoneid' => '1',
+             'securitygroupnames' => 'WebServerSecurityGroup',
+             'userdata' => 'abc',
+             'displayname' => workitem.participant_name,
+             'keypair' => 'mykeypair'
+    }
+    @client.deployVirtualMachine(args)
     reply
   end
 end
@@ -40,10 +56,28 @@ class WaitCondition < Ruote::Participant
   end
 end
 
-class SecurityGroup < Ruote::Participant
+class SecurityGroup < CloudStackResource
   def on_workitem
-    sleep(rand)
     p workitem.participant_name
+    sleep(rand)
+    props = workitem.fields['Resources'][workitem.participant_name]['Properties']
+    name = workitem.fields['StackName'] + '-' + workitem.participant_name;
+    #FIXME: workaround bug in cloudstack_ruby_client. 
+    #Transform spaces in description into underscore
+    args = { 'name' => name,
+             'description' => props['GroupDescription'].tr(' ', '_')
+    }
+    @client.createSecurityGroup(args)
+    props['SecurityGroupIngress'].each do |rule|
+        args = { 'securitygroupname' => name,
+            'startport' => rule['FromPort'],
+            'endport' => rule['ToPort'],
+            'protocol' => rule['IpProtocol'],
+            'cidrlist' => rule['CidrIp']
+        }
+        #TODO handle usersecuritygrouplist
+        @client.authorizeSecurityGroupIngress(args)
+    end
     reply
   end
 end

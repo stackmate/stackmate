@@ -8,16 +8,17 @@ require_relative 'participants'
 
 class Stacker
     include TSort
-    @@class_map = { "AWS::EC2::Instance" => "Instance",
-              "AWS::CloudFormation::WaitConditionHandle" => "WaitConditionHandle",
-              "AWS::CloudFormation::WaitCondition" => "WaitCondition",
-              "AWS::EC2::SecurityGroup" => "SecurityGroup" }
+    @@class_map = { 'AWS::EC2::Instance' => 'Instance',
+              'AWS::CloudFormation::WaitConditionHandle' => 'WaitConditionHandle',
+              'AWS::CloudFormation::WaitCondition' => 'WaitCondition',
+              'AWS::EC2::SecurityGroup' => 'SecurityGroup'}
 
-    def initialize(templatefile, stackid)
-        @stackid = stackid
+    def initialize(templatefile, stackname)
+        @stackname = stackname
+        p stackname
         @engine = Ruote::Dashboard.new(
           Ruote::Worker.new(
-            Ruote::FsStorage.new('work/' + @stackid.to_s())))
+            Ruote::FsStorage.new('work/' + @stackname.to_s())))
 
         @engine.noisy = ENV['NOISY'] == 'true'
         #@engine.noisy = true
@@ -29,13 +30,14 @@ class Stacker
         #order_resources
         @params = @templ['Parameters']
         resolve_dependencies()
+        @templ['StackName'] = @stackname
         pdef()
     end
 
-    def resolve_dependencies()
+    def resolve_dependencies
         @deps = {}
-        @templ['Resources'].each { 
-            |key,val| deps = Set.new
+        @templ['Resources'].each { |key,val| 
+            deps = Set.new
             find_refs(key, val, deps)
             @deps[key] = deps.to_a
         }
@@ -49,7 +51,7 @@ class Stacker
                 jsn.keys.each do |k|
                     if k == "Ref"
                         #only resolve dependencies on other resources for now
-                        if !@params.keys.index(jsn[k]) && jsn[k] != "AWS::Region" && jsn[k] != "AWS::StackId"
+                        if !@params.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId'
                             deps << jsn[k]
                             #print parent, ": ", deps.to_a, "\n"
                         end
@@ -69,7 +71,7 @@ class Stacker
         @deps[name].each(&block) if @deps.has_key?(name)
     end
 
-    def pdef()
+    def pdef
         participants = self.strongly_connected_components.flatten
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
@@ -77,8 +79,9 @@ class Stacker
         end
         @engine.register_participant 'Output', 'Output'
         participants << 'Output'
-        print "Ordered list of participants: ",  participants, "\n"
-        @pdef = Ruote.define 'mydef'+ @stackid.to_s() do
+        print 'Ordered list of participants: ',  participants, "\n"
+        @pdef = Ruote.define @stackname.to_s() do
+            set 'f:stack_name' => @stackname
             cursor do
                 participants.collect{ |name| __send__(name) }
             end
@@ -86,7 +89,7 @@ class Stacker
         #p @pdef
     end
     
-    def launch()
+    def launch
         wfid = @engine.launch( @pdef, @templ)
         @engine.wait_for(wfid)
     end
