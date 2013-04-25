@@ -27,6 +27,7 @@ class Instance < CloudStackResource
     myname = workitem.participant_name
     p myname
     resolved = workitem.fields['ResolvedNames']
+    resolved['AWS::StackId'] = workitem.fei.wfid #TODO put this at launch time
     sleep(rand)
     props = workitem.fields['Resources'][workitem.participant_name]['Properties']
     security_group_names = []

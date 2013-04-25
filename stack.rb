@@ -51,12 +51,20 @@ class Stacker
             find_refs(key, val, deps, pdeps)
             deps << val['DependsOn'] if val['DependsOn']
             #print key, " depends on ", deps.to_a, "\n"
+            print key, " depends on ", pdeps.to_a, "\n"
             @deps[key] = deps.to_a
             @pdeps[key] = pdeps.to_a
         }
         @pdeps.keys.each do |k|
-            if ! (@pdeps[k] - @resolved.keys).empty?
-                throw :unresolved, (@pdeps[k] - @resolved.keys)
+            unres = @pdeps[k] - @resolved.keys
+            if ! unres.empty?
+                unres.each do |u|
+                    deflt = @param_names[u]['Default']
+                    #print "Found default value ", deflt, " for ", u, "\n" if deflt
+                    @resolved[u] = deflt if deflt
+                end
+                unres = @pdeps[k] - @resolved.keys
+                throw :unresolved, (@pdeps[k] - @resolved.keys) if !unres.empty?
             end
         end
     end
