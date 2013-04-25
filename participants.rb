@@ -35,10 +35,7 @@ class Instance < CloudStackResource
         sg_name = resolved[sg['Ref']]
         security_group_names << sg_name
     end
-    keypair = nil
-    if props['KeyName']
-        keypair = resolved[props['KeyName']['Ref']]
-    end
+    keypair = resolved[props['KeyName']['Ref']] if props['KeyName']
     userdata = nil
     if props['UserData']
         userdata = user_data(props['UserData'], resolved)
@@ -50,12 +47,9 @@ class Instance < CloudStackResource
              'displayname' => myname,
              #'name' => myname
     }
-    if keypair
-        args['keypair'] = keypair
-    end
-    if userdata
-        args['userdata'] = userdata 
-    end
+    args['keypair'] = keypair if keypair
+    args['userdata'] = userdata  if userdata
+    p args
     @client.deployVirtualMachine(args)
 
     reply
@@ -69,7 +63,6 @@ class Instance < CloudStackResource
           d.kind_of?(Hash) ? resolved[d['Ref']]: d
       }
       Base64.urlsafe_encode64(data.join(delim))
-
   end
 
   def default_zone_id
