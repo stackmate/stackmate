@@ -8,6 +8,7 @@ require 'tsort'
 require 'SecureRandom'
 require 'optparse'
 require 'Base64'
+require 'yaml'
 
 class CloudStackResource < Ruote::Participant
   def initialize()
@@ -23,12 +24,17 @@ class CloudStackResource < Ruote::Participant
 end
 
 class Instance < CloudStackResource
+  def initialize()
+    super
+    @localized = {}
+    load_local_mappings()
+  end
+
   def on_workitem
     myname = workitem.participant_name
     p myname
     resolved = workitem.fields['ResolvedNames']
     resolved['AWS::StackId'] = workitem.fei.wfid #TODO put this at launch time
-    sleep(rand)
     props = workitem.fields['Resources'][workitem.participant_name]['Properties']
     security_group_names = []
     props['SecurityGroups'].each do |sg| 
@@ -40,8 +46,12 @@ class Instance < CloudStackResource
     if props['UserData']
         userdata = user_data(props['UserData'], resolved)
     end
-    args = { 'serviceofferingid' => '13954c5a-60f5-4ec8-9858-f45b12f4b846',
-             'templateid' => '7fc2c704-a950-11e2-8b38-0b06fbda5106',
+    templateid = image_id(props['ImageId'], resolved, workitem.fields['Mappings'])
+    templateid = @localized['templates'][templateid] if @localized['templates']
+    svc_offer = resolved[props['InstanceType']['Ref']]  #TODO fragile
+    svc_offer = @localized['service_offerings'][svc_offer] if @localized['service_offerings']
+    args = { 'serviceofferingid' => svc_offer,
+             'templateid' => templateid,
              'zoneid' => default_zone_id,
              'securitygroupnames' => security_group_names.join(','),
              'displayname' => myname,
@@ -49,7 +59,6 @@ class Instance < CloudStackResource
     }
     args['keypair'] = keypair if keypair
     args['userdata'] = userdata  if userdata
-    p args
     @client.deployVirtualMachine(args)
 
     reply
@@ -65,21 +74,56 @@ class Instance < CloudStackResource
       Base64.urlsafe_encode64(data.join(delim))
   end
 
+  def load_local_mappings()
+      begin
+          @localized = YAML.load_file('local.yaml')
+      rescue
+          print "Warning: Failed to load localized mappings from local.yaml\n"
+      end
+  end
+
   def default_zone_id
       '1'
+  end
+
+  def image_id(imgstring, resolved, mappings)
+      #TODO convoluted logic only handles the cases
+      #ImageId : {"Ref" : "FooBar"}
+      #ImageId :  { "Fn::FindInMap" : [ "Map1", { "Ref" : "OuterKey" },
+      #                          { "Fn::FindInMap" : [ "Map2", { "Ref" : "InnerKey" }, "InnerVal" ] } ] },
+      #ImageId :  { "Fn::FindInMap" : [ "Map1", { "Ref" : "Key" },  "Value" ] } ] },
+      if imgstring['Ref']
+          return resolved[imgstring['Ref']]
+      else 
+          if imgstring['Fn::FindInMap']
+              key = resolved[imgstring['Fn::FindInMap'][1]['Ref']]
+              #print "Key = ", key, "\n"
+              if imgstring['Fn::FindInMap'][2]['Ref']
+                  val = resolved[imgstring['Fn::FindInMap'][2]['Ref']]
+                  #print "Val [Ref] = ", val, "\n"
+              else
+                  if imgstring['Fn::FindInMap'][2]['Fn::FindInMap']
+                      val = image_id(imgstring['Fn::FindInMap'][2], resolved, mappings)
+                      #print "Val [FindInMap] = ", val, "\n"
+                  else
+                      val = imgstring['Fn::FindInMap'][2]
+                  end
+              end
+          end
+          return mappings[imgstring['Fn::FindInMap'][0]][key][val]
+      end
   end
 
 end
 
 class WaitConditionHandle < Ruote::Participant
   def on_workitem
-    sleep(rand)
     myname = workitem.participant_name
     p myname
-    p workitem.fei.wfid
     presigned_url = 'http://localhost:4567/waitcondition/' + workitem.fei.wfid + '/' + myname
     workitem.fields['ResolvedNames'][myname] = presigned_url
-    p presigned_url
+    print "Your pre-signed URL is: ", presigned_url, "\n"
+    print "Try: curl -X PUT --data 'foo' ", presigned_url,  "\n"
     WaitCondition.create_handle(myname, presigned_url)
 
     reply
@@ -90,7 +134,6 @@ class WaitCondition < Ruote::Participant
   @@handles = {}
   @@conditions = []
   def on_workitem
-    sleep(rand)
     p workitem.participant_name
     @@conditions << self
     @wi = workitem
@@ -114,7 +157,6 @@ class SecurityGroup < CloudStackResource
     myname = workitem.participant_name
     p myname
     resolved = workitem.fields['ResolvedNames']
-    sleep(rand)
     props = workitem.fields['Resources'][myname]['Properties']
     name = workitem.fields['StackName'] + '-' + workitem.participant_name;
     resolved[myname] = name

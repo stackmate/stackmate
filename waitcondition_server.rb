@@ -19,11 +19,12 @@ class WaitConditionServer < Sinatra::Base
   end
 
   put '/waitcondition/:wfeid/:waithandle' do
-    print "Got PUT of " , params[:wfeid],  ", name = ", params[:waithandle], "\n"
+    #print "Got PUT of " , params[:wfeid],  ", name = ", params[:waithandle], "\n"
     WaitCondition.get_conditions.each  do |w|
       w.set_handle(params[:waithandle].to_s)
     end
-    'success\n'
+    'success
+    '
   end
 
 

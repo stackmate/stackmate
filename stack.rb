@@ -39,6 +39,7 @@ class Stacker
            i = p.split('=')
            @resolved[i[0]] = i[1]
         end
+        @resolved['AWS::Region'] = 'us-east-1' #TODO handle this better
     end
     
     def validate_param_values
