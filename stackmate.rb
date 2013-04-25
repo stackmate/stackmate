@@ -1,5 +1,6 @@
 require 'optparse'
 require_relative 'stack'
+require_relative 'waitcondition_server'
 
 
 options = {}
@@ -33,6 +34,9 @@ rescue => e
 end
 
 if options[:file] && stack_name != ''
+    Thread.new do
+      WaitConditionServer.run!
+    end
     unresolved = catch(:unresolved) do
         p = Stacker.new(options[:file], stack_name, options[:params])
         p.launch()

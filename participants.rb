@@ -54,10 +54,9 @@ class Instance < CloudStackResource
     end
     if userdata
         args['userdata'] = userdata 
-        p userdata
     end
-
     @client.deployVirtualMachine(args)
+
     reply
   end
 
@@ -76,24 +75,43 @@ class Instance < CloudStackResource
       '1'
   end
 
-  def default_zone_id
-      '1'
-  end
 end
 
 class WaitConditionHandle < Ruote::Participant
   def on_workitem
     sleep(rand)
-    p workitem.participant_name
+    myname = workitem.participant_name
+    p myname
+    p workitem.fei.wfid
+    presigned_url = 'http://localhost:4567/waitcondition/' + workitem.fei.wfid + '/' + myname
+    workitem.fields['ResolvedNames'][myname] = presigned_url
+    p presigned_url
+    WaitCondition.create_handle(myname, presigned_url)
+
     reply
   end
 end
 
 class WaitCondition < Ruote::Participant
+  @@handles = {}
+  @@conditions = []
   def on_workitem
     sleep(rand)
     p workitem.participant_name
-    reply
+    @@conditions << self
+    @wi = workitem
+  end
+
+  def self.create_handle(handle_name, handle)
+      @@handles[handle_name] = handle
+  end
+
+  def set_handle(handle_name)
+      reply(@wi) if @@handles[handle_name]
+  end
+
+  def self.get_conditions()
+      @@conditions
   end
 end
 

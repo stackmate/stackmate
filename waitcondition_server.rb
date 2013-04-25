@@ -3,9 +3,9 @@ require 'ruote'
 require 'ruote/storage/fs_storage'
 require 'json'
 require 'sinatra/base'
+require_relative 'participants'
 
 class WaitConditionServer < Sinatra::Base
-    include Ruote::ReceiverMixin
   set :static, false
   set :run, true
 
@@ -18,12 +18,15 @@ class WaitConditionServer < Sinatra::Base
      'Hello world!'
   end
 
-  put '/hello/:wfeid/:waithandle' do
+  put '/waitcondition/:wfeid/:waithandle' do
     print "Got PUT of " , params[:wfeid],  ", name = ", params[:waithandle], "\n"
+    WaitCondition.get_conditions.each  do |w|
+      w.set_handle(params[:waithandle].to_s)
+    end
+    'success\n'
   end
 
 
   run! if app_file == $0
 
 end
-
