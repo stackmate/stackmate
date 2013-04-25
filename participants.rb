@@ -60,6 +60,8 @@ class Instance < CloudStackResource
     args['keypair'] = keypair if keypair
     args['userdata'] = userdata  if userdata
     @client.deployVirtualMachine(args)
+    #TODO: poll for completion
+    sleep(rand)
 
     reply
   end
