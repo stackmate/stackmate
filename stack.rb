@@ -13,18 +13,14 @@ class Stacker
               'AWS::CloudFormation::WaitCondition' => 'WaitCondition',
               'AWS::EC2::SecurityGroup' => 'SecurityGroup'}
 
-    def initialize(templatefile, stackname, params)
+    def initialize(engine, templatefile, stackname, params)
         @stackname = stackname
         @resolved = {}
         stackstr = File.read(templatefile)
         @templ = JSON.parse(stackstr) 
         @templ['StackName'] = @stackname
         @param_names = @templ['Parameters']
-        @engine = Ruote::Dashboard.new(
-          Ruote::Worker.new(
-            Ruote::FsStorage.new('work/' + @stackname.to_s())))
-
-        @engine.noisy = ENV['NOISY'] == 'true'
+        @engine = engine
         @deps = {}
         @pdeps = {}
         resolve_param_refs(params)
@@ -52,7 +48,7 @@ class Stacker
             find_refs(key, val, deps, pdeps)
             deps << val['DependsOn'] if val['DependsOn']
             #print key, " depends on ", deps.to_a, "\n"
-            print key, " depends on ", pdeps.to_a, "\n"
+            #print key, " depends on ", pdeps.to_a, "\n"
             @deps[key] = deps.to_a
             @pdeps[key] = pdeps.to_a
         }

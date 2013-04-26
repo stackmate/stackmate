@@ -1,5 +1,5 @@
 
-# Stackmate (CloudFormation interpreter and scheduler for CloudStack)
+# Stackmate - CloudFormation for CloudStack
 
 A lo-fi indie implementation designed to read existing CloudFormation templates 
 and execute them on a CloudStack deployment
@@ -9,6 +9,9 @@ and embeds a modular [Sinatra](http://www.sinatrarb.com/) application for wait h
 Unlike CloudFormation, it does not (yet) run as a web application. 
 Instead it runs everything on the client side
 
+Note that only Basic Zone (aka EC2-Classic) is supported for now
+
+Follow:
 * \#cloudstack-dev on Freenode
 * <http://cloudstack.apache.org/mailing-lists.html>
 * [@chiradeep](http://twitter.com/chiradeep) on Twitter
@@ -64,12 +67,17 @@ service_offerings : {'m1.small' : '13954c5a-60f5-4ec8-9858-f45b12f4b846'}
 templates : {'ami-1b814f72': '7fc2c704-a950-11e2-8b38-0b06fbda5106'}
 ```
 
-Ensure you have a ssh keypair called 'Foo' (used in the template paramter below) for your account FIRST
+Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST
+```bash
+$ cloudmonkey
+☁ Apache CloudStack 🐵 cloudmonkey 4.1.0-snapshot3. Type help or ? to list commands.
 
-Note that only Basic Zone is supported for now
+> create sshkeypair name='Foo'
+```
+
 
 * Get going
-
+Create a LAMP stack:
 ```bash
 $ bundle exec ruby stackmate.rb MYSTACK01 --template-file=templates/LAMP_Single_Instance.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=75.75.75.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=Foo"
 ```

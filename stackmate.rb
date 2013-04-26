@@ -1,3 +1,5 @@
+require 'ruote'
+require 'ruote/storage/fs_storage'
 require 'optparse'
 require_relative 'stack'
 require_relative 'waitcondition_server'
@@ -37,8 +39,13 @@ if options[:file] && stack_name != ''
     Thread.new do
       WaitConditionServer.run!
     end
+    engine = Ruote::Dashboard.new(
+      Ruote::Worker.new(
+        Ruote::FsStorage.new('work/')))
+    engine.noisy = ENV['NOISY'] == 'true'
+
     unresolved = catch(:unresolved) do
-        p = Stacker.new(options[:file], stack_name, options[:params])
+        p = Stacker.new(engine, options[:file], stack_name, options[:params])
         p.launch()
     end
     if unresolved.kind_of? Array
