@@ -41,7 +41,7 @@ if options[:file] && stack_name != ''
     end
     engine = Ruote::Dashboard.new(
       Ruote::Worker.new(
-        Ruote::FsStorage.new('work/')))
+        Ruote::HashStorage.new))
     engine.noisy = ENV['NOISY'] == 'true'
 
     unresolved = catch(:unresolved) do
