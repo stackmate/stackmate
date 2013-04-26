@@ -104,6 +104,7 @@ class Stacker
         participants = self.strongly_connected_components.flatten
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
+            throw :unknown, t if !@@class_map[t]
             @engine.register_participant p, @@class_map[t]
         end
         @engine.register_participant 'Output', 'Output'

@@ -1,5 +1,5 @@
 require 'ruote'
-require 'ruote/storage/fs_storage'
+require 'ruote/storage/hash_storage'
 require 'optparse'
 require_relative 'stack'
 require_relative 'waitcondition_server'
@@ -44,13 +44,17 @@ if options[:file] && stack_name != ''
         Ruote::HashStorage.new))
     engine.noisy = ENV['NOISY'] == 'true'
 
+    unknown = nil
     unresolved = catch(:unresolved) do
-        p = Stacker.new(engine, options[:file], stack_name, options[:params])
-        p.launch()
+        unknown = catch(:unknown) do
+            p = Stacker.new(engine, options[:file], stack_name, options[:params])
+            p.launch()
+            nil
+        end
+        nil
     end
-    if unresolved.kind_of? Array
-        puts 'Failed to resolve parameters ' + unresolved.to_s
-    end
+    puts 'Failed to resolve parameters ' + unresolved.to_s if unresolved
+    print "Sorry, I don't know how to create resources of type: ", unknown, "\n" if unknown
 else 
     puts opt_parser.help()
 end
