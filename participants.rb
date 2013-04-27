@@ -1,12 +1,9 @@
 require 'rufus-json/automatic'
 require 'ruote'
-require 'ruote/storage/fs_storage'
 require 'json'
 require 'cloudstack_ruby_client'
 require 'set'
 require 'tsort'
-require 'SecureRandom'
-require 'optparse'
 require 'Base64'
 require 'yaml'
 
@@ -17,10 +14,34 @@ class CloudStackResource < Ruote::Participant
       @seckey = ENV['SECKEY']
       @client = CloudstackRubyClient::Client.new(@url, @apikey, @seckey, false)
   end
+
   def on_workitem
     p workitem.participant_name
     reply
   end
+
+  def make_request(cmd, args)
+      resp = @client.send(cmd, args)
+      jobid = resp['jobid'] if resp
+      resp = api_poll(jobid, 3, 3) if jobid
+      return resp
+  end
+
+  def api_poll (jobid, num, period)
+    i = 0 
+    loop do 
+      break if i > num
+      resp = @client.queryAsyncJobResult({'jobid' => jobid})
+      if resp
+          return resp['jobresult'] if resp['jobstatus'] == 1
+          return {'jobresult' => {}} if resp['jobstatus'] == 2
+      end
+      sleep(period)
+      i += 1 
+    end
+    return {}
+  end
+
 end
 
 class Instance < CloudStackResource
@@ -59,9 +80,7 @@ class Instance < CloudStackResource
     }
     args['keypair'] = keypair if keypair
     args['userdata'] = userdata  if userdata
-    @client.deployVirtualMachine(args)
-    #TODO: poll for completion
-    sleep(rand)
+    resultobj = make_request('deployVirtualMachine', args)
 
     reply
   end
@@ -85,7 +104,11 @@ class Instance < CloudStackResource
   end
 
   def default_zone_id
-      '1'
+      if @localized['zoneid'] 
+          @localized['zoneid']
+      else
+          '1'
+      end
   end
 
   def image_id(imgstring, resolved, mappings)
@@ -125,7 +148,7 @@ class WaitConditionHandle < Ruote::Participant
     presigned_url = 'http://localhost:4567/waitcondition/' + workitem.fei.wfid + '/' + myname
     workitem.fields['ResolvedNames'][myname] = presigned_url
     print "Your pre-signed URL is: ", presigned_url, "\n"
-    print "Try: curl -X PUT --data 'foo' ", presigned_url,  "\n"
+    print "Try: ", "\n", "curl -X PUT --data 'foo' ", presigned_url,  "\n"
     WaitCondition.create_handle(myname, presigned_url)
 
     reply
@@ -165,7 +188,7 @@ class SecurityGroup < CloudStackResource
     args = { 'name' => name,
              'description' => props['GroupDescription']
     }
-    @client.createSecurityGroup(args)
+    make_request('createSecurityGroup', args)
     props['SecurityGroupIngress'].each do |rule|
         cidrIp = rule['CidrIp']
         if cidrIp.kind_of?  Hash
@@ -180,7 +203,7 @@ class SecurityGroup < CloudStackResource
             'cidrlist' => cidrIp
         }
         #TODO handle usersecuritygrouplist
-        @client.authorizeSecurityGroupIngress(args)
+        make_request('authorizeSecurityGroupIngress', args)
     end
     reply
   end

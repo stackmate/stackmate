@@ -38,7 +38,7 @@ Have a look at the Gemfile if you want to see the various dependencies.
 * Get the source files using git
 
 ```bash
-$ git clone http://github.com/chiradeepv/stackmate.git
+$ git clone http://github.com/chiradeep/stackmate.git
 $ cd stackmate
 ```
 
@@ -67,7 +67,7 @@ service_offerings : {'m1.small' : '13954c5a-60f5-4ec8-9858-f45b12f4b846'}
 templates : {'ami-1b814f72': '7fc2c704-a950-11e2-8b38-0b06fbda5106'}
 ```
 
-Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST
+* Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST
 ```bash
 $ cloudmonkey
 ☁ Apache CloudStack 🐵 cloudmonkey 4.1.0-snapshot3. Type help or ? to list commands.
@@ -76,8 +76,8 @@ $ cloudmonkey
 ```
 
 
-* Get going
-Create a LAMP stack:
+* Create a LAMP stack:
+
 ```bash
 $ bundle exec ruby stackmate.rb MYSTACK01 --template-file=templates/LAMP_Single_Instance.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=75.75.75.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=Foo"
 ```

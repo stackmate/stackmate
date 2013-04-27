@@ -102,6 +102,7 @@ class Stacker
 
     def pdef
         participants = self.strongly_connected_components.flatten
+        print 'Ordered list of participants: ',  participants, "\n"
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
             throw :unknown, t if !@@class_map[t]
@@ -109,7 +110,6 @@ class Stacker
         end
         @engine.register_participant 'Output', 'Output'
         participants << 'Output'
-        print 'Ordered list of participants: ',  participants, "\n"
         @pdef = Ruote.define @stackname.to_s() do
             cursor do
                 participants.collect{ |name| __send__(name) }
