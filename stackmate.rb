@@ -18,6 +18,10 @@ opt_parser = OptionParser.new do |opts|
         options[:params] = p
         puts p
     end
+    options[:wait_handles] = true
+    opts.on("-n", "--no-wait-handles", "Do not create any wait handles") do 
+        options[:wait_handles] = false
+    end
     opts.on("-h", "--help", "Show this message")  do
         puts opts
         exit
@@ -36,8 +40,10 @@ rescue => e
 end
 
 if options[:file] && stack_name != ''
-    Thread.new do
-      WaitConditionServer.run!
+    if options[:wait_handles]
+      Thread.new do
+        WaitConditionServer.run!
+      end
     end
     engine = Ruote::Dashboard.new(
       Ruote::Worker.new(
