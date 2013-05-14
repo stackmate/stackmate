@@ -8,6 +8,8 @@ require 'Base64'
 require 'yaml'
 
 class CloudStackResource < Ruote::Participant
+  attr_reader :name
+
   def initialize()
       @url = ENV['URL']
       @apikey = ENV['APIKEY']
@@ -20,27 +22,36 @@ class CloudStackResource < Ruote::Participant
     reply
   end
 
-  def make_request(cmd, args)
-      resp = @client.send(cmd, args)
-      jobid = resp['jobid'] if resp
-      resp = api_poll(jobid, 3, 3) if jobid
-      return resp
-  end
-
-  def api_poll (jobid, num, period)
-    i = 0 
-    loop do 
-      break if i > num
-      resp = @client.queryAsyncJobResult({'jobid' => jobid})
-      if resp
-          return resp['jobresult'] if resp['jobstatus'] == 1
-          return {'jobresult' => {}} if resp['jobstatus'] == 2
-      end
-      sleep(period)
-      i += 1 
+  protected
+    
+    def make_request(cmd, args)
+        begin
+          resp = @client.send(cmd, args)
+          jobid = resp['jobid'] if resp
+          resp = api_poll(jobid, 3, 3) if jobid
+          return resp
+        rescue => e
+          puts "Failed to make request to CloudStack server while creating resource #{@name}"
+          p $!, *$@
+          #p  *$@
+          raise e
+        end
     end
+  
+    def api_poll (jobid, num, period)
+      i = 0 
+      loop do 
+        break if i > num
+        resp = @client.queryAsyncJobResult({'jobid' => jobid})
+        if resp
+            return resp['jobresult'] if resp['jobstatus'] == 1
+            return {'jobresult' => {}} if resp['jobstatus'] == 2
+        end
+        sleep(period)
+        i += 1 
+      end
     return {}
-  end
+    end
 
 end
 
@@ -54,6 +65,7 @@ class Instance < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
     p myname
+    @name = myname
     resolved = workitem.fields['ResolvedNames']
     resolved['AWS::StackId'] = workitem.fei.wfid #TODO put this at launch time
     props = workitem.fields['Resources'][workitem.participant_name]['Properties']
@@ -180,6 +192,7 @@ end
 class SecurityGroup < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
+    @name = myname
     p myname
     resolved = workitem.fields['ResolvedNames']
     props = workitem.fields['Resources'][myname]['Properties']
