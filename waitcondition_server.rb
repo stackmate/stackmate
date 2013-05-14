@@ -9,13 +9,8 @@ class WaitConditionServer < Sinatra::Base
   set :static, false
   set :run, true
 
-  #def initialize(engine)
   def initialize()
       super
-  end
-
-  get '/' do
-     'Hello world!'
   end
 
   put '/waitcondition/:wfeid/:waithandle' do
