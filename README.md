@@ -6,8 +6,10 @@ and execute them on a CloudStack deployment
 Uses the [ruote](http://ruote.rubyforge.org) workflow engine,
 and embeds a modular [Sinatra](http://www.sinatrarb.com/) application for wait handles
 
-Unlike CloudFormation, it does not (yet) run as a web application. 
+Unlike CloudFormation, it does not  run as a web application. 
 Instead it runs everything on the client side
+
+[Stacktician](https://github.com/chiradeep/stacktician) embeds stackmate to run it as a web application
 
 Note that only Basic Zone (aka EC2-Classic) is supported for now
 
