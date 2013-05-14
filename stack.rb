@@ -13,8 +13,9 @@ class Stacker
               'AWS::CloudFormation::WaitCondition' => 'WaitCondition',
               'AWS::EC2::SecurityGroup' => 'SecurityGroup'}
 
-    def initialize(engine, templatefile, stackname, params)
+    def initialize(engine, templatefile, stackname, create_wait_conditions, params)
         @stackname = stackname
+        @create_wait_conditions = create_wait_conditions
         @resolved = {}
         stackstr = File.read(templatefile)
         @templ = JSON.parse(stackstr) 
@@ -102,7 +103,12 @@ class Stacker
 
     def pdef
         participants = self.strongly_connected_components.flatten
+        participants = participants.select { |p|
+            @@class_map[@templ['Resources'][p]['Type']] != 'WaitCondition'
+        } if !@create_wait_conditions
+
         print 'Ordered list of participants: ',  participants, "\n"
+
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
             throw :unknown, t if !@@class_map[t]
@@ -111,7 +117,7 @@ class Stacker
         @engine.register_participant 'Output', 'Output'
         participants << 'Output'
         @pdef = Ruote.define @stackname.to_s() do
-            cursor do
+            cursor :on_error => :cancel do
                 participants.collect{ |name| __send__(name) }
             end
         end

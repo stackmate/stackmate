@@ -18,9 +18,9 @@ opt_parser = OptionParser.new do |opts|
         options[:params] = p
         puts p
     end
-    options[:wait_handles] = true
-    opts.on("-n", "--no-wait-handles", "Do not create any wait handles") do 
-        options[:wait_handles] = false
+    options[:wait_conditions] = true
+    opts.on("-n", "--no-wait-conditions", "Do not create any wait conditions") do 
+        options[:wait_conditions] = false
     end
     opts.on("-h", "--help", "Show this message")  do
         puts opts
@@ -40,7 +40,7 @@ rescue => e
 end
 
 if options[:file] && stack_name != ''
-    if options[:wait_handles]
+    if options[:wait_conditions]
       Thread.new do
         WaitConditionServer.run!
       end
@@ -53,7 +53,7 @@ if options[:file] && stack_name != ''
     unknown = nil
     unresolved = catch(:unresolved) do
         unknown = catch(:unknown) do
-            p = Stacker.new(engine, options[:file], stack_name, options[:params])
+            p = Stacker.new(engine, options[:file], stack_name, options[:wait_conditions], options[:params])
             p.launch()
             nil
         end
