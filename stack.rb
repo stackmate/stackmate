@@ -108,6 +108,7 @@ class Stacker
 
     def pdef
         participants = self.strongly_connected_components.flatten
+        #if we want to skip creating wait conditions (useful for automated tests)
         participants = participants.select { |p|
             @@class_map[@templ['Resources'][p]['Type']] != 'WaitCondition'
         } if !@create_wait_conditions
@@ -119,10 +120,10 @@ class Stacker
             throw :unknown, t if !@@class_map[t]
             @engine.register_participant p, @@class_map[t]
         end
-        @engine.register_participant 'Output', 'Output'
+        @engine.register_participant 'Output', 'StackMate::Output'
         participants << 'Output'
         @pdef = Ruote.define @stackname.to_s() do
-            cursor :on_error => :cancel do
+            cursor do
                 participants.collect{ |name| __send__(name) }
             end
         end
@@ -132,6 +133,7 @@ class Stacker
     def launch
         wfid = @engine.launch( @pdef, @templ)
         @engine.wait_for(wfid)
+        #puts "engine error : #{@engine.errors.first.message}"
     end
 end
 

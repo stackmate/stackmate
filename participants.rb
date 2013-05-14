@@ -10,6 +10,12 @@ require_relative 'logging'
 
 module StackMate
 
+class CloudStackApiException < StandardError
+    def initialize(msg)
+        super(msg)
+    end
+end
+
 class CloudStackResource < Ruote::Participant
   include Logging
 
@@ -31,14 +37,18 @@ class CloudStackResource < Ruote::Participant
     
     def make_request(cmd, args)
         begin
+          logger.debug "Going to make request #{cmd} to CloudStack server for resource #{@name}"
           resp = @client.send(cmd, args)
           jobid = resp['jobid'] if resp
           resp = api_poll(jobid, 3, 3) if jobid
           return resp
         rescue => e
-          logger.error("Failed to make request to CloudStack server while creating resource #{@name}")
+          logger.error("Failed to make request #{cmd} to CloudStack server while creating resource #{@name}")
           logger.error e.message + "\n " + e.backtrace.join("\n ")
           raise e
+        rescue SystemExit
+          puts "rescued a SystemExit exception"
+          raise CloudStackApiException, "Did not get 200 OK while making api call #{cmd}"
         end
     end
   
@@ -68,7 +78,6 @@ class Instance < CloudStackResource
 
   def on_workitem
     myname = workitem.participant_name
-    logger.debug("Going to create resource #{myname}")
     @name = myname
     resolved = workitem.fields['ResolvedNames']
     resolved['AWS::StackId'] = workitem.fei.wfid #TODO put this at launch time
@@ -97,6 +106,7 @@ class Instance < CloudStackResource
     args['keypair'] = keypair if keypair
     args['userdata'] = userdata  if userdata
     resultobj = make_request('deployVirtualMachine', args)
+    logger.debug("Created resource #{myname}")
 
     reply
   end
@@ -207,6 +217,7 @@ class SecurityGroup < CloudStackResource
              'description' => props['GroupDescription']
     }
     make_request('createSecurityGroup', args)
+    logger.debug("created resource #{myname}")
     props['SecurityGroupIngress'].each do |rule|
         cidrIp = rule['CidrIp']
         if cidrIp.kind_of?  Hash
