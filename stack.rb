@@ -4,14 +4,19 @@ require 'ruote/storage/fs_storage'
 require 'json'
 require 'set'
 require 'tsort'
+require_relative 'logging'
 require_relative 'participants'
+
+module StackMate
 
 class Stacker
     include TSort
-    @@class_map = { 'AWS::EC2::Instance' => 'Instance',
-              'AWS::CloudFormation::WaitConditionHandle' => 'WaitConditionHandle',
-              'AWS::CloudFormation::WaitCondition' => 'WaitCondition',
-              'AWS::EC2::SecurityGroup' => 'SecurityGroup'}
+    include Logging
+
+    @@class_map = { 'AWS::EC2::Instance' => 'StackMate::Instance',
+              'AWS::CloudFormation::WaitConditionHandle' => 'StackMate::WaitConditionHandle',
+              'AWS::CloudFormation::WaitCondition' => 'StackMate::WaitCondition',
+              'AWS::EC2::SecurityGroup' => 'StackMate::SecurityGroup'}
 
     def initialize(engine, templatefile, stackname, create_wait_conditions, params)
         @stackname = stackname
@@ -107,7 +112,7 @@ class Stacker
             @@class_map[@templ['Resources'][p]['Type']] != 'WaitCondition'
         } if !@create_wait_conditions
 
-        print 'Ordered list of participants: ',  participants, "\n"
+        logger.info("Ordered list of participants: #{participants}")
 
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
@@ -128,4 +133,6 @@ class Stacker
         wfid = @engine.launch( @pdef, @templ)
         @engine.wait_for(wfid)
     end
+end
+
 end

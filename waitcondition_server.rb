@@ -5,6 +5,8 @@ require 'json'
 require 'sinatra/base'
 require_relative 'participants'
 
+module StackMate
+
 class WaitConditionServer < Sinatra::Base
   set :static, false
   set :run, true
@@ -24,5 +26,7 @@ class WaitConditionServer < Sinatra::Base
 
 
   run! if app_file == $0
+
+end
 
 end

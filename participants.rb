@@ -6,8 +6,13 @@ require 'set'
 require 'tsort'
 require 'Base64'
 require 'yaml'
+require_relative 'logging'
+
+module StackMate
 
 class CloudStackResource < Ruote::Participant
+  include Logging
+
   attr_reader :name
 
   def initialize()
@@ -31,9 +36,8 @@ class CloudStackResource < Ruote::Participant
           resp = api_poll(jobid, 3, 3) if jobid
           return resp
         rescue => e
-          puts "Failed to make request to CloudStack server while creating resource #{@name}"
-          p $!, *$@
-          #p  *$@
+          logger.error("Failed to make request to CloudStack server while creating resource #{@name}")
+          logger.error e.message + "\n " + e.backtrace.join("\n ")
           raise e
         end
     end
@@ -64,7 +68,7 @@ class Instance < CloudStackResource
 
   def on_workitem
     myname = workitem.participant_name
-    p myname
+    logger.debug("Going to create resource #{myname}")
     @name = myname
     resolved = workitem.fields['ResolvedNames']
     resolved['AWS::StackId'] = workitem.fei.wfid #TODO put this at launch time
@@ -192,6 +196,7 @@ end
 class SecurityGroup < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
+    logger.debug("Going to create resource #{myname}")
     @name = myname
     p myname
     resolved = workitem.fields['ResolvedNames']
@@ -231,3 +236,4 @@ class Output < Ruote::Participant
   end
 end
 
+end

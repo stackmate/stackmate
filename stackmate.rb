@@ -42,7 +42,7 @@ end
 if options[:file] && stack_name != ''
     if options[:wait_conditions]
       Thread.new do
-        WaitConditionServer.run!
+        StackMate::WaitConditionServer.run!
       end
     end
     engine = Ruote::Dashboard.new(
@@ -53,7 +53,7 @@ if options[:file] && stack_name != ''
     unknown = nil
     unresolved = catch(:unresolved) do
         unknown = catch(:unknown) do
-            p = Stacker.new(engine, options[:file], stack_name, options[:wait_conditions], options[:params])
+            p = StackMate::Stacker.new(engine, options[:file], stack_name, options[:wait_conditions], options[:params])
             p.launch()
             nil
         end
