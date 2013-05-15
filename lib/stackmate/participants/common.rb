@@ -1,17 +1,18 @@
-require 'json'
 require 'stackmate/logging'
 
 module StackMate
 
 
 class WaitConditionHandle < Ruote::Participant
+  include Logging
+
   def on_workitem
     myname = workitem.participant_name
-    p myname
+    logger.debug "Entering #{workitem.participant_name} "
     presigned_url = 'http://localhost:4567/waitcondition/' + workitem.fei.wfid + '/' + myname
     workitem.fields['ResolvedNames'][myname] = presigned_url
-    print "Your pre-signed URL is: ", presigned_url, "\n"
-    print "Try: ", "\n", "curl -X PUT --data 'foo' ", presigned_url,  "\n"
+    logger.info "Your pre-signed URL is: #{presigned_url} "
+    logger.info "Try: \ncurl -X PUT --data 'foo' #{presigned_url}"
     WaitCondition.create_handle(myname, presigned_url)
 
     reply
@@ -19,10 +20,11 @@ class WaitConditionHandle < Ruote::Participant
 end
 
 class WaitCondition < Ruote::Participant
+  include Logging
   @@handles = {}
   @@conditions = []
   def on_workitem
-    p workitem.participant_name
+    logger.debug "Entering #{workitem.participant_name} "
     @@conditions << self
     @wi = workitem
   end
@@ -41,10 +43,11 @@ class WaitCondition < Ruote::Participant
 end
 
 class Output < Ruote::Participant
+  include Logging
   def on_workitem
     #p workitem.fields.keys
-    p workitem.participant_name
-    p "Done"
+    logger.debug "Entering #{workitem.participant_name} "
+    logger.debug "Done"
     reply
   end
 end

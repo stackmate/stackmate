@@ -133,7 +133,7 @@ class Stacker
     def launch
         wfid = @engine.launch( @pdef, @templ)
         @engine.wait_for(wfid)
-        #puts "engine error : #{@engine.errors.first.message}"
+        logger.error { "engine error : #{@engine.errors.first.message}"} if @engine.errors.first
     end
 end
 

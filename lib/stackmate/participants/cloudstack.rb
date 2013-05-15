@@ -1,10 +1,5 @@
-require 'rufus-json/automatic'
-require 'ruote'
 require 'json'
 require 'cloudstack_ruby_client'
-require 'set'
-require 'tsort'
-require 'Base64'
 require 'yaml'
 require 'stackmate/logging'
 
@@ -47,7 +42,7 @@ class CloudStackResource < Ruote::Participant
           logger.error e.message + "\n " + e.backtrace.join("\n ")
           raise e
         rescue SystemExit
-          puts "rescued a SystemExit exception"
+          logger.error "Rescued a SystemExit exception"
           raise CloudStackApiException, "Did not get 200 OK while making api call #{cmd}"
         end
     end
