@@ -3,7 +3,7 @@ require 'ruote'
 require 'ruote/storage/fs_storage'
 require 'json'
 require 'sinatra/base'
-require 'stackmate/participants/participants'
+require 'stackmate/participants/common'
 
 module StackMate
 

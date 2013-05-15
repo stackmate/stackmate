@@ -1,2 +1,3 @@
 require 'stackmate/stack'
-require 'stackmate/participants/participants.rb'
+require 'stackmate/participants/common.rb'
+require 'stackmate/participants/cloudstack.rb'

@@ -1,12 +1,11 @@
-require 'rufus-json/automatic'
 require 'ruote'
-require 'ruote/storage/fs_storage'
 require 'json'
 require 'set'
 require 'tsort'
 require 'stackmate/logging'
 require 'stackmate/classmap'
-require 'stackmate/participants/participants'
+require 'stackmate/participants/cloudstack'
+require 'stackmate/participants/common'
 
 module StackMate
 
@@ -111,7 +110,7 @@ class Stacker
         participants = self.strongly_connected_components.flatten
         #if we want to skip creating wait conditions (useful for automated tests)
         participants = participants.select { |p|
-            StackMate::CLASS_MAP[@templ['Resources'][p]['Type']] != 'WaitCondition'
+            StackMate::CLASS_MAP[@templ['Resources'][p]['Type']] != 'StackMate::WaitCondition'
         } if !@create_wait_conditions
 
         logger.info("Ordered list of participants: #{participants}")
