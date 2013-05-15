@@ -1,17 +1,17 @@
 
 # Stackmate - CloudFormation for CloudStack
 
-A lo-fi indie implementation designed to read existing CloudFormation templates 
-and execute them on a CloudStack deployment
+A library designed to read existing CloudFormation templates 
+and execute them on a CloudStack deployment. 
 Uses the [ruote](http://ruote.rubyforge.org) workflow engine,
-and embeds a modular [Sinatra](http://www.sinatrarb.com/) application for wait handles
+and embeds a modular [Sinatra](http://www.sinatrarb.com/) application for wait handles.
 
 Unlike CloudFormation, it does not  run as a web application. 
-Instead it runs everything on the client side
+Instead it runs everything on the client side.
 
-[Stacktician](https://github.com/chiradeep/stacktician) embeds stackmate to run it as a web application
+[Stacktician](https://github.com/chiradeep/stacktician) embeds stackmate to run it as a web application.
 
-Note that only Basic Zone (aka EC2-Classic) is supported for now
+Note that only Basic Zone (aka EC2-Classic) is supported for now.
 
 Follow:
 * \#cloudstack-dev on Freenode
@@ -44,7 +44,7 @@ $ git clone http://github.com/chiradeep/stackmate.git
 $ cd stackmate
 ```
 
-* Make sure every dependency is resolved
+* Make sure every dependency is resolved.
 
 ```bash
 $ bundle install
@@ -61,7 +61,7 @@ $ export URL="http://localhost:8080/client/api"
 
 * The supplied templates are taken from the AWS samples. 
 
-You need a couple of mappings from AWS ids to your CloudStack implementation
+You need a couple of mappings from AWS ids to your CloudStack implementation:
 
 ```bash
 $ cat local.yaml 
@@ -69,7 +69,8 @@ service_offerings : {'m1.small' : '13954c5a-60f5-4ec8-9858-f45b12f4b846'}
 templates : {'ami-1b814f72': '7fc2c704-a950-11e2-8b38-0b06fbda5106'}
 ```
 
-* Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST
+* Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST:
+
 ```bash
 $ cloudmonkey
 ☁ Apache CloudStack 🐵 cloudmonkey 4.1.0-snapshot3. Type help or ? to list commands.
@@ -81,7 +82,7 @@ $ cloudmonkey
 * Create a LAMP stack:
 
 ```bash
-$ bundle exec ruby stackmate.rb MYSTACK01 --template-file=templates/LAMP_Single_Instance.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=75.75.75.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=Foo"
+bin/stackmate MYSTACK01   --template-file=templates/LAMP_Single_Instance.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=75.75.75.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=Foo"
 ```
 
 * If everything is successful, stackmate will hang after deploying the security groups and vms. 
@@ -93,9 +94,10 @@ Try: curl -X PUT --data 'foo' http://localhost:4567/waitcondition/20130425-0706-
 ```
 Executing the curl should unblock the wait handle. The idea of course is that the instance boots up, and reads its userdata and calls the same URL.
 
+If you don't want the wait condition server to run, just use '-n'. Stackmate will not hang with this flag.
+
 ## TODO
 * Parallelize (with ruote concurrence) where possible
-* Use async polling of api endpoint
 * rollback on error
 * timeouts
 * embed in a web app
