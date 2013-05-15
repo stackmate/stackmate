@@ -69,7 +69,7 @@ class CloudStackResource < Ruote::Participant
 
 end
 
-class Instance < CloudStackResource
+class CloudStackInstance < CloudStackResource
   def initialize()
     super
     @localized = {}
@@ -203,7 +203,7 @@ class WaitCondition < Ruote::Participant
   end
 end
 
-class SecurityGroup < CloudStackResource
+class CloudStackSecurityGroup < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
     logger.debug("Going to create resource #{myname}")
