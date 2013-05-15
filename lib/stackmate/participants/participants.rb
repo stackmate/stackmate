@@ -6,7 +6,7 @@ require 'set'
 require 'tsort'
 require 'Base64'
 require 'yaml'
-require_relative 'logging'
+require 'stackmate/logging'
 
 module StackMate
 

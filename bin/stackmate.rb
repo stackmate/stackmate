@@ -1,8 +1,8 @@
 require 'ruote'
 require 'ruote/storage/hash_storage'
 require 'optparse'
-require_relative 'stack'
-require_relative 'waitcondition_server'
+require 'stackmate'
+require 'stackmate/waitcondition_server'
 
 
 options = {}

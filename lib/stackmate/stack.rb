@@ -4,8 +4,8 @@ require 'ruote/storage/fs_storage'
 require 'json'
 require 'set'
 require 'tsort'
-require_relative 'logging'
-require_relative 'participants'
+require 'stackmate/logging'
+require 'stackmate/participants/participants'
 
 module StackMate
 

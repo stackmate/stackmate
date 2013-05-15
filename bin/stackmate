@@ -1,0 +1,2 @@
+#!/bin/bash
+bundle exec ruby -Ilib $(dirname $0)/stackmate.rb $*
