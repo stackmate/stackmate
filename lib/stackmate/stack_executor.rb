@@ -21,16 +21,17 @@ class StackExecutor < StackMate::Stacker
         participants = self.strongly_connected_components.flatten
         #if we want to skip creating wait conditions (useful for automated tests)
         participants = participants.select { |p|
-            StackMate::CLASS_MAP[@templ['Resources'][p]['Type']] != 'StackMate::WaitCondition'
+            StackMate.class_for(@templ['Resources'][p]['Type']) != 'StackMate::WaitCondition'
         } if !@create_wait_conditions
 
         logger.info("Ordered list of participants: #{participants}")
 
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
-            throw :unknown, t if !StackMate::CLASS_MAP[t]
-            @engine.register_participant p, StackMate::CLASS_MAP[t]
+            throw :unknown, t if !StackMate.class_for(t)
+            @engine.register_participant p, StackMate.class_for(t)
         end
+
         @engine.register_participant 'Output', 'StackMate::Output'
         participants << 'Output'
         @pdef = Ruote.define @stackname.to_s() do

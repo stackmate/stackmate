@@ -2,6 +2,7 @@ require 'ruote'
 require 'ruote/storage/hash_storage'
 require 'optparse'
 require 'stackmate'
+require 'stackmate/classmap'
 require 'stackmate/waitcondition_server'
 
 
@@ -53,6 +54,7 @@ if options[:file] && stack_name != ''
     unknown = nil
     unresolved = catch(:unresolved) do
         unknown = catch(:unknown) do
+            #StackMate.configure('NOOP')
             p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions])
             p.launch()
             nil

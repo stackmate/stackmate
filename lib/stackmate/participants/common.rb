@@ -52,4 +52,13 @@ class Output < Ruote::Participant
   end
 end
 
+class NoOpResource < Ruote::Participant
+  include Logging
+
+  def on_workitem
+    logger.debug "Entering #{workitem.participant_name} "
+    reply
+  end
+end
+
 end
