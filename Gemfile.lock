@@ -1,13 +1,8 @@
-GIT
-  remote: git://github.com/chipchilders/cloudstack_ruby_client
-  revision: 90dfed2b12987527dd819cfc19d0bd2c59651fce
-  specs:
-    cloudstack_ruby_client (0.0.4)
-
 GEM
   remote: https://rubygems.org/
   specs:
     blankslate (2.1.2.4)
+    cloudstack_ruby_client (0.0.4)
     file-tail (1.0.12)
       tins (~> 0.5)
     json (1.7.7)
@@ -60,7 +55,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  cloudstack_ruby_client!
+  cloudstack_ruby_client (>= 0.0.4)
   json
   ruote (>= 2.3.0)
   sinatra (>= 1.4.2)
