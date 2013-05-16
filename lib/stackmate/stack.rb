@@ -9,10 +9,9 @@ class Stacker
     include TSort
     include Logging
 
-    def initialize(templatefile, stackname, params)
+    def initialize(stackstr, stackname, params)
         @stackname = stackname
         @resolved = {}
-        stackstr = File.read(templatefile)
         @templ = JSON.parse(stackstr) 
         @templ['StackName'] = @stackname
         @param_names = @templ['Parameters']

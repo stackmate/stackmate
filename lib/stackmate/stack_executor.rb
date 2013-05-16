@@ -12,7 +12,8 @@ class StackExecutor < StackMate::Stacker
     include Logging
 
     def initialize(templatefile, stackname, params, engine, create_wait_conditions)
-        super(templatefile, stackname, params)
+        stackstr = File.read(templatefile)
+        super(stackstr, stackname, params)
         @engine = engine
         @create_wait_conditions = create_wait_conditions
     end
