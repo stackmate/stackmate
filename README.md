@@ -96,11 +96,13 @@ Executing the curl should unblock the wait handle. The idea of course is that th
 
 If you don't want the wait condition server to run, just use '-n'. Stackmate will not hang with this flag.
 
+If you want to validate your template, you can use the --dry-run option. This will parse and validate the template and create an execution schedule.
+
 ## TODO
 * Parallelize (with ruote concurrence) where possible
 * rollback on error
 * timeouts
-* embed in a web app
+* embed in a web app ( [Stacktician](https://github.com/chiradeep/stacktician) )
 * add support for Advanced Zone templates (VPC), LB, etc
 
 ## Feedback & bug reports
