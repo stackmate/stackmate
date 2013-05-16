@@ -38,12 +38,10 @@ class StackExecutor < StackMate::Stacker
                 participants.collect{ |name| __send__(name) }
             end
         end
-        #p @pdef
     end
     
     def launch
-        pdef
-        wfid = @engine.launch( @pdef, @templ)
+        wfid = @engine.launch( pdef, @templ)
         @engine.wait_for(wfid)
         logger.error { "engine error : #{@engine.errors.first.message}"} if @engine.errors.first
     end

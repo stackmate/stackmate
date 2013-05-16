@@ -53,7 +53,7 @@ if options[:file] && stack_name != ''
     unknown = nil
     unresolved = catch(:unresolved) do
         unknown = catch(:unknown) do
-            p = StackMate::Stacker.new(engine, options[:file], stack_name, options[:wait_conditions], options[:params])
+            p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions])
             p.launch()
             nil
         end
