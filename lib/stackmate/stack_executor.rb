@@ -13,9 +13,19 @@ class StackExecutor < StackMate::Stacker
 
     def initialize(templatefile, stackname, params, engine, create_wait_conditions)
         stackstr = File.read(templatefile)
-        super(stackstr, stackname, params)
+        super(stackstr, stackname, resolve_param_refs(params))
         @engine = engine
         @create_wait_conditions = create_wait_conditions
+    end
+
+    def resolve_param_refs(params)
+        resolved_params = {}
+        params.split(';').each do |p|
+           i = p.split('=')
+           resolved_params[i[0]] = i[1]
+        end
+        resolved_params['AWS::Region'] = 'us-east-1' #TODO handle this better
+        resolved_params
     end
 
     def pdef

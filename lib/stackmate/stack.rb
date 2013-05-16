@@ -11,25 +11,17 @@ class Stacker
 
     def initialize(stackstr, stackname, params)
         @stackname = stackname
-        @resolved = {}
+        @resolved = params
         @templ = JSON.parse(stackstr) 
         @templ['StackName'] = @stackname
         @param_names = @templ['Parameters']
         @deps = {}
         @pdeps = {}
-        resolve_param_refs(params)
         validate_param_values
         resolve_dependencies()
         @templ['ResolvedNames'] = @resolved
     end
 
-    def resolve_param_refs(params)
-        params.split(';').each do |p|
-           i = p.split('=')
-           @resolved[i[0]] = i[1]
-        end
-        @resolved['AWS::Region'] = 'us-east-1' #TODO handle this better
-    end
     
     def validate_param_values
         #TODO CloudFormation parameters have validity constraints specified
