@@ -23,6 +23,10 @@ opt_parser = OptionParser.new do |opts|
     opts.on("-n", "--no-wait-conditions", "Do not create any wait conditions") do 
         options[:wait_conditions] = false
     end
+    options[:dry_run] = false
+    opts.on("-r", "--dry-run", "Parse and pretend to execute but not actually do anything. Useful for validating the template") do 
+        options[:dry_run] = true
+    end
     opts.on("-h", "--help", "Show this message")  do
         puts opts
         exit
@@ -54,7 +58,7 @@ if options[:file] && stack_name != ''
     unknown = nil
     unresolved = catch(:unresolved) do
         unknown = catch(:unknown) do
-            #StackMate.configure('NOOP')
+            StackMate.configure('NOOP') if options[:dry_run]
             p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions])
             p.launch()
             nil
