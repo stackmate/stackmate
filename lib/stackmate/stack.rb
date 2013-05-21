@@ -63,7 +63,7 @@ class Stacker
                     #TODO Fn::GetAtt
                     if k == "Ref"
                         #only resolve dependencies on other resources for now
-                        if !@param_names.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId'
+                        if !@param_names.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId' && jsn[k] != 'AWS::StackName'
                             deps << jsn[k]
                             #print parent, ": ", deps.to_a, "\n"
                         else if @param_names.keys.index(jsn[k])
