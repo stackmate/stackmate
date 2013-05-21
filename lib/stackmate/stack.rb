@@ -9,6 +9,8 @@ class Stacker
     include TSort
     include Logging
 
+    attr_accessor :templ
+
     def initialize(stackstr, stackname, params)
         @stackname = stackname
         @resolved = params
