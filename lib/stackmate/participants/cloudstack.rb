@@ -16,10 +16,11 @@ class CloudStackResource < Ruote::Participant
 
   attr_reader :name
 
-  def initialize()
-      @url = ENV['URL']
-      @apikey = ENV['APIKEY']
-      @seckey = ENV['SECKEY']
+  def initialize(opts)
+      @opts = opts
+      @url = opts['URL'] || ENV['URL'] or raise ArgumentError.new("CloudStackResources: no URL supplied for CloudStack API")
+      @apikey = opts['APIKEY'] || ENV['APIKEY'] or raise ArgumentError.new("CloudStackResources: no api key supplied for CloudStack API")
+      @seckey = opts['SECKEY'] || ENV['SECKEY'] or raise ArgumentError.new("CloudStackResources: no secret key supplied for CloudStack API")
       @client = CloudstackRubyClient::Client.new(@url, @apikey, @seckey, false)
   end
 
@@ -65,8 +66,8 @@ class CloudStackResource < Ruote::Participant
 end
 
 class CloudStackInstance < CloudStackResource
-  def initialize()
-    super
+  def initialize(opts)
+    super (opts)
     @localized = {}
     load_local_mappings()
   end
@@ -75,7 +76,6 @@ class CloudStackInstance < CloudStackResource
     myname = workitem.participant_name
     @name = myname
     resolved = workitem.fields['ResolvedNames']
-    resolved['AWS::StackId'] = workitem.fei.wfid #TODO put this at launch time
     props = workitem.fields['Resources'][workitem.participant_name]['Properties']
     security_group_names = []
     props['SecurityGroups'].each do |sg| 

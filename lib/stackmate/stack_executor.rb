@@ -11,11 +11,12 @@ module StackMate
 class StackExecutor < StackMate::Stacker
     include Logging
 
-    def initialize(templatefile, stackname, params, engine, create_wait_conditions)
+    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts)
         stackstr = File.read(templatefile)
         super(stackstr, stackname, resolve_param_refs(params, stackname))
         @engine = engine
         @create_wait_conditions = create_wait_conditions
+        @api_opts = api_opts
     end
 
     def resolve_param_refs(params, stackname)
@@ -42,7 +43,7 @@ class StackExecutor < StackMate::Stacker
         participants.each do |p|
             t = @templ['Resources'][p]['Type']
             throw :unknown, t if !StackMate.class_for(t)
-            @engine.register_participant p, StackMate.class_for(t)
+            @engine.register_participant p, StackMate.class_for(t), @api_opts
         end
 
         @engine.register_participant 'Output', 'StackMate::Output'

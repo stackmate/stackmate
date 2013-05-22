@@ -59,7 +59,9 @@ if options[:file] && stack_name != ''
     unresolved = catch(:unresolved) do
         unknown = catch(:unknown) do
             StackMate.configure('NOOP') if options[:dry_run]
-            p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions])
+            opts = {}
+            api_opts = {:APIKEY => "#{ENV['APIKEY']}", :SECKEY => "#{ENV['SECKEY']}", :URL => "#{ENV['URL']}" }
+            p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts)
             p.launch()
             nil
         end
