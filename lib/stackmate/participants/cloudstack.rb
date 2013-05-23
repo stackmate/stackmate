@@ -104,7 +104,8 @@ class CloudStackInstance < CloudStackResource
     resultobj = make_request('deployVirtualMachine', args)
     logger.debug("Created resource #{myname}")
 
-    workitem[participant_name][:physical_id] =  resultobj['jobresult']['virtualmachine']['id']
+    logger.debug("result = #{resultobj.inspect}")
+    workitem[participant_name][:physical_id] =  resultobj['virtualmachine']['id']
     reply
   end
 
