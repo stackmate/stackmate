@@ -123,7 +123,7 @@ class CloudStackInstance < CloudStackResource
       begin
           @localized = YAML.load_file('local.yaml')
       rescue
-          print "Warning: Failed to load localized mappings from local.yaml\n"
+          logger.warning "Warning: Failed to load localized mappings from local.yaml\n"
       end
   end
 

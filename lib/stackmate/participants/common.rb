@@ -31,7 +31,6 @@ class WaitCondition < Ruote::Participant
     @@conditions << self
     stackname = workitem.fields['ResolvedNames']['AWS::StackName']
     workitem[participant_name][:physical_id] =  stackname + '-' + 'WaitCondition'
-    @wi = workitem
   end
 
   def self.create_handle(handle_name, handle)
@@ -39,7 +38,7 @@ class WaitCondition < Ruote::Participant
   end
 
   def set_handle(handle_name)
-      reply(@wi) if @@handles[handle_name]
+      reply(workitem) if @@handles[handle_name]
   end
 
   def self.get_conditions()
