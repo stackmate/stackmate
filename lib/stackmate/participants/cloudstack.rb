@@ -73,7 +73,8 @@ class CloudStackInstance < CloudStackResource
   end
 
   def on_workitem
-    myname = workitem.participant_name
+    workitem[participant_name] = {}
+    myname = participant_name
     @name = myname
     resolved = workitem.fields['ResolvedNames']
     props = workitem.fields['Resources'][workitem.participant_name]['Properties']
@@ -103,6 +104,7 @@ class CloudStackInstance < CloudStackResource
     resultobj = make_request('deployVirtualMachine', args)
     logger.debug("Created resource #{myname}")
 
+    workitem[participant_name][:physical_id] =  resultobj['jobresult']['virtualmachine']['id']
     reply
   end
 
@@ -166,6 +168,7 @@ end
 class CloudStackSecurityGroup < CloudStackResource
   def on_workitem
     myname = workitem.participant_name
+    workitem[participant_name] = {}
     logger.debug("Going to create resource #{myname}")
     @name = myname
     p myname
@@ -176,7 +179,7 @@ class CloudStackSecurityGroup < CloudStackResource
     args = { 'name' => name,
              'description' => props['GroupDescription']
     }
-    make_request('createSecurityGroup', args)
+    sg_resp = make_request('createSecurityGroup', args)
     logger.debug("created resource #{myname}")
     props['SecurityGroupIngress'].each do |rule|
         cidrIp = rule['CidrIp']
@@ -194,6 +197,7 @@ class CloudStackSecurityGroup < CloudStackResource
         #TODO handle usersecuritygrouplist
         make_request('authorizeSecurityGroupIngress', args)
     end
+    workitem[participant_name][:physical_id] =  sg_resp['securitygroup']['id']
     reply
   end
 end
