@@ -49,7 +49,7 @@ class StackExecutor < StackMate::Stacker
         @engine.register_participant 'Output', 'StackMate::Output'
         participants << 'Output'
         @pdef = Ruote.define @stackname.to_s() do
-            cursor do
+            cursor :timeout => '300s' do
                 participants.collect{ |name| __send__(name) }
             end
         end

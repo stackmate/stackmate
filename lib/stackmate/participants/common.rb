@@ -60,7 +60,7 @@ class NoOpResource < Ruote::Participant
   include Logging
 
   def on_workitem
-    logger.debug "Entering #{participant_name} "
+    logger.debug "Entering #{participant_name} wfid=#{workitem.fei.wfid} fei=#{workitem.fei.to_h}"
     workitem[participant_name] = {}
     stackname = workitem.fields['ResolvedNames']['AWS::StackName']
     logger.debug "physical id is  #{stackname}-#{participant_name} "
