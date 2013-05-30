@@ -1,3 +1,8 @@
-service_offerings : {'m1.small' : '8f8dd747-1608-4000-92be-d8e4755facde'}
-templates : {'ami-1b814f72': 'f1fc1b96-bceb-11e2-8b38-0b06fbda5106'}
-zoneid: 'a1e84c63-5576-491c-a57c-09d49994e23e'
+---
+service_offerings:
+  m1.small: 1c8db272-f95a-406c-bce3-39192ce965fa
+templates:
+  ami-1b814f72: 3ea4563e-c7eb-11e2-b0ed-7f3baba63e45
+zoneid: b3409835-02b0-4d21-bba4-1f659402117e
+
+
