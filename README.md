@@ -64,9 +64,13 @@ $ export URL="http://localhost:8080/client/api"
 You need a couple of mappings from AWS ids to your CloudStack implementation:
 
 ```bash
-$ cat local.yaml 
-service_offerings : {'m1.small' : '13954c5a-60f5-4ec8-9858-f45b12f4b846'}
-templates : {'ami-1b814f72': '7fc2c704-a950-11e2-8b38-0b06fbda5106'}
+$ cat local.yml 
+---
+service_offerings:
+  m1.small: 1c8db272-f95a-406c-bce3-39192ce965fa
+templates:
+  ami-1b814f72: 3ea4563e-c7eb-11e2-b0ed-7f3baba63e45
+zoneid: b3409835-02b0-4d21-bba4-1f659402117e
 ```
 
 * Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST:

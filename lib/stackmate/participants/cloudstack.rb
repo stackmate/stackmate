@@ -121,7 +121,7 @@ class CloudStackInstance < CloudStackResource
 
   def load_local_mappings()
       begin
-          @localized = YAML.load_file('local.yaml')
+          @localized = YAML.load_file('local.yml')
       rescue
           logger.warning "Warning: Failed to load localized mappings from local.yaml\n"
       end
