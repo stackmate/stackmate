@@ -46,7 +46,7 @@ class StackExecutor < StackMate::Stacker
             @engine.register_participant p, StackMate.class_for(t), @api_opts
         end
 
-        @engine.register_participant 'Output', 'StackMate::Output'
+        @engine.register_participant 'Output', StackMate.class_for('Outputs')
         participants << 'Output'
         @pdef = Ruote.define @stackname.to_s() do
             cursor :timeout => '300s' do

@@ -2,6 +2,7 @@ require 'json'
 require 'cloudstack_ruby_client'
 require 'yaml'
 require 'stackmate/logging'
+require 'stackmate/intrinsic_functions'
 
 module StackMate
 
@@ -106,6 +107,12 @@ class CloudStackInstance < CloudStackResource
 
     logger.debug("result = #{resultobj.inspect}")
     workitem[participant_name][:physical_id] =  resultobj['virtualmachine']['id']
+    workitem[participant_name][:AvailabilityZone] =  resultobj['virtualmachine']['zoneid']
+    ipaddress = resultobj['virtualmachine']['nic'][0]['ipaddress']
+    workitem[participant_name][:PrivateDnsName] =  ipaddress
+    workitem[participant_name][:PublicDnsName] =  ipaddress
+    workitem[participant_name][:PrivateIp] = ipaddress
+    workitem[participant_name][:PublicIp] =  ipaddress
     reply
   end
 
@@ -203,5 +210,24 @@ class CloudStackSecurityGroup < CloudStackResource
   end
 end
 
+
+class CloudStackOutput < Ruote::Participant
+  include Logging
+  include Intrinsic
+
+  def on_workitem
+    logger.debug "Entering #{participant_name} "
+    outputs = workitem.fields['Outputs']
+    outputs.each do |key, val|
+      v = val['Value']
+      constructed_value = intrinsic(v, workitem)
+      val['Value'] = constructed_value
+      logger.debug "Output: key = #{key}, value = #{constructed_value} descr = #{val['Description']}"
+    end
+    logger.debug "Output Done"
+    reply
+  end
+
+end
 
 end
