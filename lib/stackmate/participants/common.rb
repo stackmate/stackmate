@@ -1,4 +1,6 @@
 require 'stackmate/logging'
+require 'stackmate/aws_attribs'
+require 'stackmate/intrinsic_functions'
 
 module StackMate
 
@@ -48,10 +50,21 @@ end
 
 class Output < Ruote::Participant
   include Logging
+  include Intrinsic
+
   def on_workitem
     #p workitem.fields.keys
     logger.debug "Entering #{workitem.participant_name} "
-    logger.debug "Done"
+    outputs = workitem.fields['Outputs']
+    logger.debug "In StackMate::Output.on_workitem #{outputs.inspect}"
+    outputs.each do |key, val|
+      v = val['Value']
+      constructed_value = intrinsic(v, workitem)
+      val['Value'] = constructed_value
+      logger.debug "Output: key = #{key}, value = #{constructed_value} descr = #{val['Description']}"
+    end
+
+    logger.debug "Output Done"
     reply
   end
 end
@@ -65,6 +78,12 @@ class NoOpResource < Ruote::Participant
     stackname = workitem.fields['ResolvedNames']['AWS::StackName']
     logger.debug "physical id is  #{stackname}-#{participant_name} "
     workitem[participant_name][:physical_id] =  stackname + '-' + participant_name
+    typ = workitem['Resources'][participant_name]['Type']
+    if AWS_FAKE_ATTRIB_VALUES[typ]
+      AWS_FAKE_ATTRIB_VALUES[typ].each do |k,v| 
+        workitem[participant_name][k] = v
+      end
+    end
     reply
   end
 end
