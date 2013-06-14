@@ -77,8 +77,8 @@ class CloudStackInstance < CloudStackResource
     workitem[participant_name] = {}
     myname = participant_name
     @name = myname
-    resolved = workitem.fields['ResolvedNames']
-    props = workitem.fields['Resources'][workitem.participant_name]['Properties']
+    resolved = workitem['ResolvedNames']
+    props = workitem['Resources'][workitem.participant_name]['Properties']
     security_group_names = []
     props['SecurityGroups'].each do |sg| 
         sg_name = resolved[sg['Ref']]
@@ -89,7 +89,7 @@ class CloudStackInstance < CloudStackResource
     if props['UserData']
         userdata = user_data(props['UserData'], resolved)
     end
-    templateid = image_id(props['ImageId'], resolved, workitem.fields['Mappings'])
+    templateid = image_id(props['ImageId'], resolved, workitem['Mappings'])
     templateid = @localized['templates'][templateid] if @localized['templates']
     svc_offer = resolved[props['InstanceType']['Ref']]  #TODO fragile
     svc_offer = @localized['service_offerings'][svc_offer] if @localized['service_offerings']
@@ -184,9 +184,9 @@ class CloudStackSecurityGroup < CloudStackResource
     logger.debug("Going to create resource #{myname}")
     @name = myname
     p myname
-    resolved = workitem.fields['ResolvedNames']
-    props = workitem.fields['Resources'][myname]['Properties']
-    name = workitem.fields['StackName'] + '-' + workitem.participant_name;
+    resolved = workitem['ResolvedNames']
+    props = workitem['Resources'][myname]['Properties']
+    name = workitem['StackName'] + '-' + workitem.participant_name;
     resolved[myname] = name
     args = { 'name' => name,
              'description' => props['GroupDescription']
@@ -225,7 +225,7 @@ class CloudStackOutput < Ruote::Participant
 
   def on_workitem
     logger.debug "Entering #{participant_name} "
-    outputs = workitem.fields['Outputs']
+    outputs = workitem['Outputs']
     outputs.each do |key, val|
       v = val['Value']
       constructed_value = intrinsic(v, workitem)
