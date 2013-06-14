@@ -73,7 +73,7 @@ class CloudStackInstance < CloudStackResource
     load_local_mappings()
   end
 
-  def on_workitem
+  def create
     workitem[participant_name] = {}
     myname = participant_name
     @name = myname
@@ -113,6 +113,10 @@ class CloudStackInstance < CloudStackResource
     workitem[participant_name][:PublicDnsName] =  ipaddress
     workitem[participant_name][:PrivateIp] = ipaddress
     workitem[participant_name][:PublicIp] =  ipaddress
+  end
+
+  def on_workitem
+    create
     reply
   end
 
@@ -174,7 +178,7 @@ end
 
 
 class CloudStackSecurityGroup < CloudStackResource
-  def on_workitem
+  def create
     myname = workitem.participant_name
     workitem[participant_name] = {}
     logger.debug("Going to create resource #{myname}")
@@ -206,6 +210,10 @@ class CloudStackSecurityGroup < CloudStackResource
         make_request('authorizeSecurityGroupIngress', args)
     end
     workitem[participant_name][:physical_id] =  sg_resp['securitygroup']['id']
+  end
+
+  def on_workitem
+    create
     reply
   end
 end
