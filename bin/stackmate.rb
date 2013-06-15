@@ -54,6 +54,7 @@ if options[:file] && stack_name != ''
       Ruote::Worker.new(
         Ruote::HashStorage.new))
     engine.noisy = ENV['NOISY'] == 'true'
+    engine.configure('wait_logger_timeout', 600)
 
     unknown = nil
     unresolved = catch(:unresolved) do

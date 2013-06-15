@@ -8,7 +8,7 @@ module StackMate
 class WaitConditionHandle < Ruote::Participant
   include Logging
 
-  def on_workitem
+  def create
     logger.debug "Entering #{participant_name} "
     workitem[participant_name] = {}
     presigned_url = 'http://localhost:4567/waitcondition/' + workitem.fei.wfid + '/' + participant_name
@@ -17,7 +17,25 @@ class WaitConditionHandle < Ruote::Participant
     logger.info "Try: \ncurl -X PUT --data 'foo' #{presigned_url}"
     WaitCondition.create_handle(participant_name, presigned_url)
     workitem[participant_name][:physical_id] = presigned_url
+  end
 
+  def delete
+    logger.info "In delete #{participant_name}"
+    return nil if !workitem[participant_name]
+    physical_id = workitem[participant_name][:physical_id]
+    if physical_id
+      workitem[participant_name] = {}
+      WaitCondition.delete_handle(participant_name)
+    end
+  end
+
+  def on_workitem
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      #rollback / delete
+      delete
+    end
     reply
   end
 end
@@ -27,7 +45,7 @@ class WaitCondition < Ruote::Participant
   @@handles = {}
   @@conditions = []
 
-  def on_workitem
+  def create
     logger.debug "Entering #{workitem.participant_name} "
     workitem[participant_name] = {}
     @@conditions << self
@@ -35,8 +53,27 @@ class WaitCondition < Ruote::Participant
     workitem[participant_name][:physical_id] =  stackname + '-' + 'WaitCondition'
   end
 
+  def delete
+    logger.info "In delete #{participant_name}"
+    #no-op
+  end
+
+  def on_workitem
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      #rollback / delete
+      delete
+      reply
+    end
+  end
+
   def self.create_handle(handle_name, handle)
       @@handles[handle_name] = handle
+  end
+
+  def self.delete_handle(handle_name)
+      @@handles.delete(handle_name)
   end
 
   def set_handle(handle_name)

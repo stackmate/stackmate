@@ -115,8 +115,22 @@ class CloudStackInstance < CloudStackResource
     workitem[participant_name][:PublicIp] =  ipaddress
   end
 
+  def delete
+    logger.info "In delete #{participant_name}"
+    return nil if !workitem[participant_name]
+    physical_id = workitem[participant_name]['physical_id']
+    if physical_id
+      args = {'id' => physical_id}
+      del_resp = make_request('destroyVirtualMachine', args)
+    end
+  end
+
   def on_workitem
-    create
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
     reply
   end
 
@@ -178,6 +192,7 @@ end
 
 
 class CloudStackSecurityGroup < CloudStackResource
+
   def create
     myname = workitem.participant_name
     workitem[participant_name] = {}
@@ -212,8 +227,23 @@ class CloudStackSecurityGroup < CloudStackResource
     workitem[participant_name][:physical_id] =  sg_resp['securitygroup']['id']
   end
 
+  def delete
+    logger.info "In delete #{participant_name}"
+    return nil if !workitem[participant_name]
+    logger.info "In delete #{participant_name} #{workitem[participant_name].inspect}"
+    physical_id = workitem[participant_name]['physical_id']
+    if physical_id
+      args = {'id' => physical_id}
+      del_resp = make_request('deleteSecurityGroup', args)
+    end
+  end
+
   def on_workitem
-    create
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
     reply
   end
 end

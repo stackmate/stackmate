@@ -47,17 +47,20 @@ class StackExecutor < StackMate::Stacker
         end
 
         @engine.register_participant 'Output', StackMate.class_for('Outputs')
-        participants << 'Output'
         @pdef = Ruote.define @stackname.to_s() do
-            cursor :timeout => '300s' do
-                participants.collect{ |name| __send__(name) }
+            cursor :timeout => '300s', :on_error => 'rollback', :on_timeout => 'rollback' do
+                participants.collect{ |name| __send__(name, :operation => :create) }
+                __send__('Output')
+            end
+            define 'rollback', :timeout => '300s' do
+                participants.reverse_each.collect {|name| __send__(name, :operation => :rollback) }
             end
         end
     end
     
     def launch
         wfid = @engine.launch( pdef, @templ)
-        @engine.wait_for(wfid)
+        @engine.wait_for(wfid, :timeout => 600)
         logger.error { "engine error : #{@engine.errors.first.message}"} if @engine.errors.first
     end
 end
