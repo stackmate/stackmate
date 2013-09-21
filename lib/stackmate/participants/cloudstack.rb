@@ -3,6 +3,7 @@ require 'cloudstack_ruby_client'
 require 'yaml'
 require 'stackmate/logging'
 require 'stackmate/intrinsic_functions'
+require 'stackmate/resolver'
 
 module StackMate
 
@@ -113,6 +114,8 @@ class CloudStackInstance < CloudStackResource
     workitem[participant_name][:PublicDnsName] =  ipaddress
     workitem[participant_name][:PrivateIp] = ipaddress
     workitem[participant_name][:PublicIp] =  ipaddress
+
+    workitem['IdMap'][resultobj['virtualmachine']['id']] = participant_name
   end
 
   def delete
@@ -190,6 +193,125 @@ class CloudStackInstance < CloudStackResource
 
 end
 
+class CloudStackVPC < CloudStackResource
+  include Logging
+  include Intrinsic
+  include Resolver
+
+  def initialize(opts)
+    super(opts)
+    localized = {}
+    load_local_mappings{}
+  end
+    
+  
+  def create
+    #vpc_name = workitem.participant_name
+    workitem[@vpc_name]={}
+    logger.debug "Creating VPC #{@vpc_name} "
+    #p workitem
+    resolved = workitem['ResolvedNames']
+    vpc_props = workitem['Resources'][@vpc_name]['Properties']
+    vpc_name_cs = workitem['StackName'] + '-' + @vpc_name
+    resolved[@vpc_name] = vpc_name_cs
+
+    args = { 'name' => vpc_name_cs,
+             'zoneid' => default_zone_id,
+             'displaytext' => vpc_name_cs,
+           }
+    #Traverse tags to change displaytext
+    args['displaytext'] = get_named_tag('Name',vpc_props,workitem,vpc_name_cs)
+    args['cidr'] = get_resolved(vpc_props['CidrBlock'],workitem) #Call resolver on this
+    instance_tenancy = vpc_props['InstanceTenancy']
+    vpc_offering_id = get_vpc_offering_id(instance_tenancy) #Or take from parameters. TODO decide
+    args['vpcofferingid'] = vpc_offering_id
+    #Also get CreateDHCPOptions for VPC network
+    dhcp_options_tag = get_name_by_reference(@vpc_name)
+    domain_in_dhcp = workitem['Resources'][dhcp_options_tag]['Properties']['DomainName']
+    domain_name = resolved[domain_in_dhcp['Ref']] if domain_in_dhcp.kind_of?(Hash) else domain_in_dhcp
+    #domain_name = get_resolved(domain_in_dhcp,workitem)
+    #args['domainid'] = get_domain_id(domain_name)
+    args['networkdomain'] = domain_name
+    logger.info("Creating VPC with following arguments ")
+    p args
+    reply
+    result_obj = make_request('createVPC', args)
+    p result_obj
+    vpc_obj = result_obj['vpc']
+    workitem[@vpc_name][:physical_id] = vpc_obj['id']
+    workitem[@vpc_name][:account] = vpc_obj['account']
+    workitem[@vpc_name][:domainid] = vpc_obj['domainid']
+
+    #then get public gateway details by making list API request
+    args = {'vpcid' => workitem[participant_name][:id]
+            }
+    result_obj = make_request('listRouters',args)
+    router_obj = result_obj['router']
+    workitem[@vpc_name]['public_router'] = {}
+    workitem[@vpc_name]['public_router'][:routerid] = router_obj['id']
+    workitem[@vpc_name]['public_router'][:publicip] = router_obj['publicip']
+    workitem[@vpc_name]['public_router'][:publicnetmask] = router_obj['publicnetmask']
+    workitem[@vpc_name]['public_router'][:gateway] = router_obj['gateway']
+
+    workitem['IdMap'][vpc_obj['id']] = @vpc_name
+  end 
+
+  def delete
+    logger.debug "Deleting VPC #{@vpc_name} "
+    args = {'id' => workitem[@vpc_name]['physical_id']
+            }
+    #result_obj = make_request("deleteVPC",args)
+  end
+
+  def on_workitem
+    @vpc_name = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+  def load_local_mappings()
+      begin
+          @localized = YAML.load_file('local.yml')
+      rescue
+          logger.warning "Warning: Failed to load localized mappings from local.yaml\n"
+      end
+  end
+
+  def default_zone_id
+      if @localized['zoneid']
+          @localized['zoneid']
+      else
+          '1'
+      end
+  end 
+  
+  def get_vpc_offering_id(tenancy)
+      if @localized['vpc_offering_id']
+          @localized['vpc_offering_id']
+      else
+          '1'
+      end
+  end
+
+  #redundant
+  def get_domain_id(domain_name)
+      if @localized['domain_name']
+        @localized['domain_name']
+      else
+        '1'
+      end
+  end
+
+  #TODO modify this to use dhcp options attach instead
+  def get_name_by_reference(vpc_name)
+     return "xaDhcpOptions"
+  end
+end
+
+
 
 class CloudStackSecurityGroup < CloudStackResource
 
@@ -225,6 +347,7 @@ class CloudStackSecurityGroup < CloudStackResource
         make_request('authorizeSecurityGroupIngress', args)
     end
     workitem[participant_name][:physical_id] =  sg_resp['securitygroup']['id']
+    workitem['IdMap'][sg_resp['securitygroup']['id']] = participant_name
   end
 
   def delete
@@ -248,13 +371,455 @@ class CloudStackSecurityGroup < CloudStackResource
   end
 end
 
+class CloudStackDHCPNoOp < Ruote::Participant
+  include Logging
+  include Resolver
+  include Intrinsic
+
+  def create
+    logger.debug("Creating DHCPOptions for #{participant_name}")
+    name = workitem.participant_name
+    workitem[name] = {}
+    resolved = workitem['ResolvedNames']
+    dhcp_name_cs = workitem['StackName'] + '-' + name
+    resolved[name] = dhcp_name_cs
+    props = workitem['Resources'][name]['Properties']
+    workitem[name][:domain_name] = get_resolved(props['DomainName'],workitem)
+    workitem[name][:tagged_name] = get_named_tag('Name',props,workitem,dhcp_name_cs)
+  end
+
+  def delete
+    logger.debug("Deleting DHCPOptions for #{participant_name}")
+  end
+  
+  def on_workitem
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+end
+
+class CloudStackACL < CloudStackResource
+  include Logging
+  include Intrinsic
+  include Resolver
+
+  def create
+    workitem[@acl_name]={}
+    logger.debug "Creating VPC ACL List resource #{acl_name} "
+    resolved = workitem['ResolvedNames']
+    acl_props = workitem['Resources'][@acl_name]['Properties']
+    acl_name_cs = workitem['StackName'] + '-' + @acl_name
+    resolved[@acl_name] = acl_name_cs
+    vpcid = get_vpc_ref(acl_props,workitem)['physical_id']
+    description = get_named_tag('Name',acl_props,workitem,acl_name)
+    args = {'name' => acl_name_cs,
+            'vpcid' => vpcid,
+            'description' => description
+            }
+    # acl_props.keys.each do |property|
+    #   args[property] = acl_props[property]
+    # end
+    
+    result_obj = make_request('createNetworkACLList',args)
+    acl_obj = result_obj['acllist']
+    workitem[@acl_name][:physical_id] = acl_obj['id']
+    workitem[@acl_name][:name] = acl_obj['name']
+    workitem[@acl_name][:vpcid] = acl_obj['vpcid']
+
+    workitem['IdMap'][acl_obj['id']] = @acl_name
+  end
+
+  def delete
+    logger.debug "Deleting VPC ACL List resource #{acl_name} "
+  end
+
+  def on_workitem
+    @acl_name = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+  def get_vpc_ref(props,workitem)
+    workitem[props['VpcId']['Ref']] #Return resolved not needed. Actually may be needed
+  end
+
+end
+
+class CloudStackGatewayNoOp < CloudStackResource
+  include Logging
+  include Intrinsic
+  include Resolver
+
+  def create
+    logger.debug("Creating resource Gateway(NoOp) #{@gateway_name}")
+    
+    workitem[@gateway_name] = {}
+    resolved = workitem['ResolvedNames']
+    gateway_props = workitem['Resources'][@gateway_name]['Properties']
+    gateway_name_cs =  workitem['StackName'] + '-' + @gateway_name
+    resolved[@gateway_name] = gateway_name_cs
+    #Only resolve names
+    workitem[@gateway_name][:name] = get_named_tag('Name',gateway_props,workitem,gateway_name_cs)
+    #p get_named_tag('Name',gateway_props,workitem,gateway_name_cs)
+
+  end
+
+  def delete
+    logger.debug("Deleting resource Gateway(NoOp) #{@gateway_name}")
+  end
+
+  def on_workitem
+    @gateway_name = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+end
+
+#This is same as above
+class CloudStackInetGatewayNoOp < Ruote::Participant
+  include Logging
+  include Intrinsic
+  include Resolver
+  def create
+    logger.debug("Creating resource InetGateway(NoOp) #{@gateway_name}")
+    workitem[@gateway_name] = {}
+    resolved = workitem['ResolvedNames']
+    gateway_props = workitem['Resources'][@gateway_name]['Properties']
+    gateway_name_cs =  workitem['StackName'] + '-' + @gateway_name
+    resolved[@gateway_name] = gateway_name_cs
+    #Only resolve names
+    workitem[@gateway_name][:name] = get_named_tag('Name',gateway_props,workitem,gateway_name_cs)
+  end
+
+  def delete
+    logger.debug("Deleting resource InetGateway(NoOp) #{@gateway_name}")
+  end
+  def on_workitem
+    @gateway_name = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+end
+
+class CloudStackVPNGateway < CloudStackResource
+  include Logging
+  include Intrinsic
+  include Resolver
+
+  def create
+    logger.debug("Creating actual gateway with attachment #{@gateway_attachment}")
+    workitem[@gateway_attachment] = {}
+    resolved = workitem['ResolvedNames']
+    gateway_props = workitem['Resources'][@gateway_attachment]['Properties']
+    gateway_cs =  workitem['StackName'] + '-' + @gateway_attachment
+    p get_vpc_ref(gateway_props,workitem)
+    vpc_id = get_vpc_ref(gateway_props,workitem)['physical_id']
+    args={
+          'vpcid' => vpc_id
+          }
+
+    #make request
+    logger.info("Making request for VPN Gateway to CloudStack with parameters ")
+    p args
+  end
+
+  def delete
+    logger.debug("Deleting actual gateway with attachment #{@gateway_attachment}")
+  end
+  def on_workitem
+    @gateway_attachment = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+  def get_vpc_ref(props,workitem)
+    workitem[props['VpcId']['Ref']] #Return resolved not needed
+  end
+
+  def get_gateway_ref(props,workitem)
+    workitem[props['InternetGatewayId']['Ref']]
+  end
+end
+
+class CloudStackVPCGatewayAttachmentNoOp < Ruote::Participant
+  include Logging
+  include Intrinsic
+  include Resolver
+
+  def create
+    logger.debug("Linking gateway with attachment #{@gateway_attachment}")
+    #workitem[@gateway_attachment] = {}
+    resolved = workitem['ResolvedNames']
+    gateway_props = workitem['Resources'][@gateway_attachment]['Properties']
+    gateway_cs =  workitem['StackName'] + '-' + @gateway_attachment
+    vpc = get_vpc_ref(gateway_props,workitem)
+    gateway = get_gateway_ref(gateway_props,workitem)
+    workitem[gateway][:physical_id] = vpc['public_router']['id']
+    workitem[gateway][:ip] = vpc['public_router']['publicip']
+    workitem[gateway][:netmask] = vpc['public_router']['publicnetmask']
+    workitem[gateway][:gateway] = vpc['public_router']['gateway']
+    logger.info("Attaching public internet gateway info for #{@gateway_attachment} ")
+    #workitem['IdMap'][vpc['public_router']['id']] = @gateway_attachment
+    p workitem[gateway]
+  end
+
+  def delete
+    logger.debug("Deleting gateway with attachment #{@gateway_attachment}")
+  end
+
+  def on_workitem
+    @gateway_attachment = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+  def get_vpc_ref(props,workitem)
+    workitem[props['VpcId']['Ref']] #Return resolved not needed. Actually may be needed
+  end
+
+  def get_gateway_ref(props,workitem)
+    workitem[props['InternetGatewayId']['Ref']]
+  end
+end
+
+class CloudStackVPCNetwork < CloudStackResource
+  include Logging
+  include Resolver
+  include Intrinsic
+  require 'netaddr'
+
+
+  def create
+    logger.debug("Creating resource Network for VPC #{@network_name}")
+    workitem[@network_name] = {}
+    resolved = workitem['ResolvedNames']
+    network_name_cs = workitem['StackName'] + '-' + @network_name
+    resolved[@network_name] = network_name_cs
+    network_props = workitem['Resources'][@network_name]['Properties']
+    displaytext = get_named_tag('Name',network_props,workitem,network_name_cs)
+    #TODO handle other tags
+    vpcid = get_vpc_ref(network_props,workitem)['physical_id']
+    args = {'vpcid' => vpcid,
+            'name' => network_name_cs,
+            'displaytext' => displaytext,
+            'zoneid' => default_zone_id }
+    cidr = get_resolved(network_props['CidrBlock'],workitem)
+    cidr_obj = NetAddr::CIDR.create(cidr)
+    #gateway_ip = 
+    #netmask = get_netmask(cidr_obj)
+    args['netmask'] = get_netmask(cidr_obj)
+    args['gateway'] = get_gateway_ip(cidr_obj)
+    result_obj = make_request('createNetwork',args)
+    network_obj = result_obj['network']
+    workitem[@network_name][:physical_id] = network_obj['id']
+    workitem[@network_name][:name] = network_obj['name']
+    workitem[@network_name][:cidr] = network_obj['cidr']
+    workitem[@network_name][:gatewayip] = network_obj['gateway']
+    workitem[@network_name][:netmask] = network_obj['netmask']
+    workitem[@network_name][:vpcid] = network_obj['vpcid']
+    workitem[@network_name][:networkdomain] = network_obj['networkdomain']
+    workitem[@network_name][:networkofferingid] = network_obj['networkofferingid']
+
+    workitem['IdMap'][network_obj['id']] = @network_name
+
+  end
+
+  def delete
+    logger.debug("Deleting resource Network for VPC #{@network_name}")
+  end
+
+  def on_workitem
+    @network_name = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+  def get_netmask(cidr)
+    cidr.wildcard_mask
+  end
+
+  def get_gateway_ip(cidr)
+    cidr.nth(1)
+  end
+
+  def get_vpc_ref(props,workitem)
+    workitem[props['VpcId']['Ref']] #Return resolved not needed
+  end
+
+  def load_local_mappings()
+      begin
+          @localized = YAML.load_file('local.yml')
+      rescue
+          logger.warning "Warning: Failed to load localized mappings from local.yaml\n"
+      end
+  end
+
+  def default_zone_id
+      if @localized['zoneid']
+          @localized['zoneid']
+      else
+          '1'
+      end
+  end
+
+  def get_network_offering_id(vpcid)
+      if @localized['network_offering_id']
+          @localized['network_offering_id']
+      else
+          '11'
+      end
+  end
+end
+
+class CloudStackVolume < CloudStackResource
+  include Logging
+  include Resolver
+  include Intrinsic
+
+  def create
+    logger.debug("Creating new volume #{@volume_name}")
+    workitem[@volume_name] = {}
+    resolved = workitem['ResolvedNames']
+    volume_name_cs =  workitem['StackName'] + '-' + @volume_name
+    resolved[@volume_name] = volume_name_cs
+    volume_props = workitem['Resources'][@volume_name]['Properties']
+    args = {'name' => volume_name_cs,
+            }
+    args['snapshotid'] = volume_props['SnapshotId'] if !volume_props['SnapshotId'].nil?
+    args['size'] = volume_props['Size'] if !volume_props['Size'].nil?
+    args['diskofferingid'] = get_diskoffering_id(volume_props,workitem) if !volume_props['Size'].nil? 
+    args['zoneid'] = default_zone_id if !volume_props['Size'].nil? 
+    #TODO handle Iops, volumetype if possible
+    result_obj = make_request('createVolume',args)
+    volume_obj = result_obj['volume']
+    workitem[@volume_name][:physical_id] = volume_obj['id']
+    workitem[@volume_name][:size] = volume_obj['size']
+
+    workitem['IdMap'][volume_obj['id']] = @volume_name
+  end
+
+  def delete
+    logger.debug("Deleting volume #{@volume_name}")
+    #first detach
+    #then delete
+
+  end
+
+  def on_workitem
+    @volume_name = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+  def load_local_mappings()
+      begin
+          @localized = YAML.load_file('local.yml')
+      rescue
+          logger.warning "Warning: Failed to load localized mappings from local.yaml\n"
+      end
+  end
+
+  def default_zone_id
+      if @localized['zoneid']
+          @localized['zoneid']
+      else
+          '1'
+      end
+  end
+
+  def get_diskoffering_id(volume_props,workitem)
+    if @localized['diskofferingid']
+      @localized['diskofferingid']
+    else
+      '6' #custom diskofferingid so size is used
+    end
+  end
+end
+
+class CloudStackVolumeAttachment < CloudStackResource
+  include Logging
+  include Resolver
+  include Intrinsic
+
+  def create
+    logger.debug("Attaching volume to instance using attachment #{@volume_attachment}")
+    workitem[@volume_attachment] = {}
+    volume_props = workitem['Resources'][@volume_attachment]['Properties']
+    volume_id = get_volume_ref(volume_props,workitem)
+    instance_id = get_instance_ref(volume_props,workitem)
+    device_id = resolve_to_deviceid(get_resolved(volume_props['Device']))
+    args = {'id' => volume_id,
+            'virtualmachineid' => instance_id,
+            'deviceid' => device_id
+            }
+    result_obj = make_request('attachVolume',args)
+    volume_obj = result_obj['volume']
+    workitem[@volume_attachment][:physical_id] = volume_obj['id']
+    workitem[@volume_attachment][:instanceid] = volume_obj['virtualmachineid']
+    workitem[@volume_attachment][:deviceid] = volume_obj['deviceid']
+  end
+
+  def delete
+    logger.debug("Disconnecting attachment #{@volume_attachment}")
+  end
+
+  def on_workitem
+    @volume_attachment = workitem.participant_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+  def get_volume_ref(volume_props,workitem)
+    get_resolved(volume_props['VolumeId'],workitem)
+  end
+
+  def get_instance_ref(volume_props,workitem)
+    get_resolved(volume_props['InstanceId'],workitem)
+  end
+end
 
 class CloudStackOutput < Ruote::Participant
   include Logging
   include Intrinsic
-
   def on_workitem
-    logger.debug "Entering #{participant_name} "
+    stackname = workitem['StackName']
+    logger.debug "Entering Outputs for #{stackname} "
     outputs = workitem['Outputs']
     outputs.each do |key, val|
       v = val['Value']
@@ -263,9 +828,12 @@ class CloudStackOutput < Ruote::Participant
       logger.debug "Output: key = #{key}, value = #{constructed_value} descr = #{val['Description']}"
     end
     logger.debug "Output Done"
+    if("True".eql?(workitem['ResolvedNames']['isnested']))
+      stackrand = workitem['ResolvedNames']['stackrand']
+      File.open("/tmp/#{stackname}.workitem.#{stackrand}",'w') { |file| file.write(YAML.dump(workitem)) } #TODO better file handling
+    end
     reply
   end
-
 end
 
 end

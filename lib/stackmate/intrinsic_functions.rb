@@ -51,7 +51,11 @@ module StackMate
 
     def fn_ref(value, workitem)
         #logger.debug "Intrinsic: fn_ref  value = #{value}"
-        workitem[value]['physical_id'] #TODO only works with Resources not Params
+        if workitem[value]
+          workitem[value]['physical_id'] #TODO only works with Resources not Params
+        else
+          workitem['ResolvedNames'][value]
+        end
     end
 
   end

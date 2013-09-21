@@ -5,8 +5,22 @@ module StackMate
    CS_CLASS_MAP = { 
               'AWS::CloudFormation::WaitConditionHandle' => 'StackMate::WaitConditionHandle',
               'AWS::CloudFormation::WaitCondition' => 'StackMate::WaitCondition',
+              'AWS::CloudFormation::Stack' => 'StackMate::StackNest',
               'AWS::EC2::Instance' => 'StackMate::CloudStackInstance',
               'AWS::EC2::SecurityGroup' => 'StackMate::CloudStackSecurityGroup',
+              'AWS::EC2::VPC' => 'StackMate::CloudStackVPC',
+              'AWS::EC2::DHCPOptions' => 'StackMate::CloudStackDHCPNoOp',
+              'AWS::EC2::InternetGateway' => 'StackMate::CloudStackGatewayNoOp',
+              #'AWS::EC2::VPCGatewayAttachment' => 'StackMate::CloudStackVPNGateway',
+              'AWS::EC2::NetworkAcl' => 'StackMate::CloudStackNetworkACL',
+              'AWS::EC2::InternetGateway' => 'StackMate::CloudStackInetGatewayNoOp',
+              'AWS::EC2::VPCGatewayAttachment' => 'StackMate::CloudStackVPCGatewayAttachmentNoOp',
+              'AWS::EC2::Subnet' => 'StackMate::CloudStackVPCNetwork',
+              'AWS::EC2::Volume' => 'StackMate::CloudStackVolume',
+              'AWS::EC2::VolumeAttachment' => 'StackMate::CloudStackVolumeAttachment',
+              'AWS::EC2::NetworkInterface' => 'StackMate::NoOpResource',
+              'AWS::EC2::EIP' => 'StackMate::NoOpResource',
+              'AWS::EC2::EIPAssociation' => 'StackMate::NoOpResource',
               'Outputs' => 'StackMate::CloudStackOutput'
    }
 

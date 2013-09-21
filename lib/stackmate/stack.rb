@@ -21,10 +21,34 @@ class Stacker
         @pdeps = {}
         validate_param_values
         resolve_dependencies()
-        @templ['ResolvedNames'] = @resolved
+        @allowed_param_vales = get_allowed_values(@param_names)
+        @templ['ResolvedNames'] = populate_parameters(@param_names,@resolved)
+        @templ['IdMap'] = {}
     end
 
-    
+    def get_allowed_values(template_params)
+        allowed = {}
+        template_params.each_key do |k|
+            #Type is mandatory???
+            allowed[k] = {}
+            allowed[k]['Type'] = template_params[k]['Type'] if template_params[k].has_key?('Type')
+            allowed[k]['AllowedValues'] = template_params[k]['AllowedValues'] if template_params[k].has_key?('AllowedValues')
+        end
+        allowed
+    end
+
+    def populate_parameters(params,overrides)
+        populated={}
+        #Populate defaults
+        params.each_key do |k|
+            populated[k] = params[k]['Default']
+        end
+        #Then override
+        overrides.each_key do |k|
+            populated[k] = overrides[k]
+        end
+        populated
+    end
     def validate_param_values
         #TODO CloudFormation parameters have validity constraints specified
         #Use them to validate parameter values (e.g., email addresses)
