@@ -134,6 +134,17 @@
       }
    },
    "Resources":{
+"xaVPCDhcpOptionsAssoc":{
+         "Type":"AWS::EC2::VPCDHCPOptionsAssociation",
+         "Properties":{
+            "VpcId":{
+               "Ref":"xaVPC"
+            },
+            "DhcpOptionsId":{
+               "Ref":"xaDhcpOptions"
+            }
+         }
+      },
 "xaDhcpOptions":{
          "Type":"AWS::EC2::DHCPOptions",
          "Properties":{
@@ -213,5 +224,15 @@
             ]
          }
       }
-   }
+   },
+  "Outputs":{
+       "VpcId":{
+           "Value":{
+               "Fn::GetAtt":[
+               "xaVPC",
+               "physical_id"
+           ] 
+         }
+      } 
+  }
 }

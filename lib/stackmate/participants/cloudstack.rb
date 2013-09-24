@@ -32,7 +32,7 @@ class CloudStackResource < Ruote::Participant
   end
 
   protected
-    
+
     def make_request(cmd, args)
         begin
           logger.debug "Going to make request #{cmd} to CloudStack server for resource #{@name}"
@@ -193,7 +193,7 @@ class CloudStackInstance < CloudStackResource
 
 end
 
-class CloudStackVPC < CloudStackResource
+class CloudStackVPCNoOp < CloudStackResource
   include Logging
   include Intrinsic
   include Resolver
@@ -208,7 +208,7 @@ class CloudStackVPC < CloudStackResource
   def create
     #vpc_name = workitem.participant_name
     workitem[@vpc_name]={}
-    logger.debug "Creating VPC #{@vpc_name} "
+    logger.debug "Creating VPC #{@vpc_name} NoOp "
     #p workitem
     resolved = workitem['ResolvedNames']
     vpc_props = workitem['Resources'][@vpc_name]['Properties']
@@ -225,39 +225,11 @@ class CloudStackVPC < CloudStackResource
     instance_tenancy = vpc_props['InstanceTenancy']
     vpc_offering_id = get_vpc_offering_id(instance_tenancy) #Or take from parameters. TODO decide
     args['vpcofferingid'] = vpc_offering_id
-    #Also get CreateDHCPOptions for VPC network
-    dhcp_options_tag = get_name_by_reference(@vpc_name)
-    domain_in_dhcp = workitem['Resources'][dhcp_options_tag]['Properties']['DomainName']
-    domain_name = resolved[domain_in_dhcp['Ref']] if domain_in_dhcp.kind_of?(Hash) else domain_in_dhcp
-    #domain_name = get_resolved(domain_in_dhcp,workitem)
-    #args['domainid'] = get_domain_id(domain_name)
-    args['networkdomain'] = domain_name
-    logger.info("Creating VPC with following arguments ")
-    p args
-    reply
-    result_obj = make_request('createVPC', args)
-    p result_obj
-    vpc_obj = result_obj['vpc']
-    workitem[@vpc_name][:physical_id] = vpc_obj['id']
-    workitem[@vpc_name][:account] = vpc_obj['account']
-    workitem[@vpc_name][:domainid] = vpc_obj['domainid']
-
-    #then get public gateway details by making list API request
-    args = {'vpcid' => workitem[participant_name][:id]
-            }
-    result_obj = make_request('listRouters',args)
-    router_obj = result_obj['router']
-    workitem[@vpc_name]['public_router'] = {}
-    workitem[@vpc_name]['public_router'][:routerid] = router_obj['id']
-    workitem[@vpc_name]['public_router'][:publicip] = router_obj['publicip']
-    workitem[@vpc_name]['public_router'][:publicnetmask] = router_obj['publicnetmask']
-    workitem[@vpc_name]['public_router'][:gateway] = router_obj['gateway']
-
-    workitem['IdMap'][vpc_obj['id']] = @vpc_name
+    workitem[@vpc_name]['args'] = args
   end 
 
   def delete
-    logger.debug "Deleting VPC #{@vpc_name} "
+    logger.debug "Deleting VPC #{@vpc_name} NoOp"
     args = {'id' => workitem[@vpc_name]['physical_id']
             }
     #result_obj = make_request("deleteVPC",args)
@@ -265,6 +237,7 @@ class CloudStackVPC < CloudStackResource
 
   def on_workitem
     @vpc_name = workitem.participant_name
+    @name = @vpc_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -272,6 +245,7 @@ class CloudStackVPC < CloudStackResource
     end
     reply
   end
+
   def load_local_mappings()
       begin
           @localized = YAML.load_file('local.yml')
@@ -295,23 +269,68 @@ class CloudStackVPC < CloudStackResource
           '1'
       end
   end
-
-  #redundant
-  def get_domain_id(domain_name)
-      if @localized['domain_name']
-        @localized['domain_name']
-      else
-        '1'
-      end
-  end
-
-  #TODO modify this to use dhcp options attach instead
-  def get_name_by_reference(vpc_name)
-     return "xaDhcpOptions"
-  end
 end
 
 
+class CloudStackVPC < CloudStackResource
+
+  include Logging
+  include Intrinsic
+  include Resolver
+
+  def create
+    resolved = workitem['ResolvedNames']
+    attachment_props = workitem['Resources'][@attachment_name]['Properties']
+    #Below two lines are valid and not fragile since the template specification says it has to be reference
+    vpc_name = get_resolved(attachment_props['VpcId']['Ref'],workitem)
+    dhcp_options = get_resolved(attachment_props['DhcpOptionsId']['Ref'],workitem)
+    logger.debug("Creating VPC #{vpc_name} using options #{dhcp_options} in attachment #{@attachment_name}")
+    args = workitem[vpc_name]['args']
+    args['networkdomain'] = workitem[dhcp_options]['domain_name']
+
+    logger.info("Creating VPC with following arguments ")
+    p args
+    result_obj = make_request('createVPC', args)
+    vpc_obj = result_obj['vpc']
+    workitem[vpc_name][:physical_id] = vpc_obj['id']
+    workitem[vpc_name][:account] = vpc_obj['account']
+    workitem[vpc_name][:domainid] = vpc_obj['domainid']
+    workitem[vpc_name][:name] = vpc_name
+
+    #then get public gateway details by making list API request
+    args = {'vpcid' => workitem[vpc_name][:physical_id]
+            }
+    result_obj = make_request('listRouters',args)
+    router_obj = result_obj['router'][0]
+    workitem[vpc_name]['public_router'] = {}
+    workitem[vpc_name]['public_router'][:routerid] = router_obj['id']
+    workitem[vpc_name]['public_router'][:publicip] = router_obj['publicip']
+    workitem[vpc_name]['public_router'][:publicnetmask] = router_obj['publicnetmask']
+    workitem[vpc_name]['public_router'][:gateway] = router_obj['gateway']
+    workitem['IdMap'][vpc_obj['id']] = vpc_name
+  end
+
+  def delete
+    attachment_props = workitem['Resources'][@attachment_name]['Properties']
+    vpc_name = get_resolved(attachment_props['Properties']['VpcId'],workitem)
+    logger.debug("Deleting VPC #{vpc_name} associated with #{@attachment_name}")
+    args = {'id' => workitem[vpc_name]['physical_id']
+            }
+    #make_request('deleteVPC',args,vpc_name)
+  end
+
+  def on_workitem
+    @attachment_name = workitem.participant_name
+    @name = @attachment_name
+    if workitem['params']['operation'] == 'create'
+      create
+    else
+      delete
+    end
+    reply
+  end
+
+end
 
 class CloudStackSecurityGroup < CloudStackResource
 
@@ -377,22 +396,23 @@ class CloudStackDHCPNoOp < Ruote::Participant
   include Intrinsic
 
   def create
-    logger.debug("Creating DHCPOptions for #{participant_name}")
-    name = workitem.participant_name
-    workitem[name] = {}
+    logger.debug("Creating DHCPOptions for #{@name}")
+    
+    workitem[@name] = {}
     resolved = workitem['ResolvedNames']
-    dhcp_name_cs = workitem['StackName'] + '-' + name
-    resolved[name] = dhcp_name_cs
-    props = workitem['Resources'][name]['Properties']
-    workitem[name][:domain_name] = get_resolved(props['DomainName'],workitem)
-    workitem[name][:tagged_name] = get_named_tag('Name',props,workitem,dhcp_name_cs)
+    dhcp_name_cs = workitem['StackName'] + '-' + @name
+    #resolved[name] = dhcp_name_cs
+    props = workitem['Resources'][@name]['Properties']
+    workitem[@name][:domain_name] = get_resolved(props['DomainName'],workitem)
+    workitem[@name][:tagged_name] = get_named_tag('Name',props,workitem,dhcp_name_cs)
   end
 
   def delete
-    logger.debug("Deleting DHCPOptions for #{participant_name}")
+    logger.debug("Deleting DHCPOptions for #{@name}")
   end
   
   def on_workitem
+    @name = workitem.participant_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -439,6 +459,7 @@ class CloudStackACL < CloudStackResource
 
   def on_workitem
     @acl_name = workitem.participant_name
+    @name = @acl_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -478,6 +499,7 @@ class CloudStackGatewayNoOp < CloudStackResource
 
   def on_workitem
     @gateway_name = workitem.participant_name
+    @name = @gateway_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -508,6 +530,7 @@ class CloudStackInetGatewayNoOp < Ruote::Participant
   end
   def on_workitem
     @gateway_name = workitem.participant_name
+    @name = @gateway_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -544,6 +567,7 @@ class CloudStackVPNGateway < CloudStackResource
   end
   def on_workitem
     @gateway_attachment = workitem.participant_name
+    @name = @gateway_attachment
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -589,6 +613,7 @@ class CloudStackVPCGatewayAttachmentNoOp < Ruote::Participant
 
   def on_workitem
     @gateway_attachment = workitem.participant_name
+    @name = @gateway_attachment
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -654,6 +679,7 @@ class CloudStackVPCNetwork < CloudStackResource
 
   def on_workitem
     @network_name = workitem.participant_name
+    @name = @network_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -735,6 +761,7 @@ class CloudStackVolume < CloudStackResource
 
   def on_workitem
     @volume_name = workitem.participant_name
+    @name = @volume_name
     if workitem['params']['operation'] == 'create'
       create
     else
@@ -797,6 +824,7 @@ class CloudStackVolumeAttachment < CloudStackResource
 
   def on_workitem
     @volume_attachment = workitem.participant_name
+    @name = @volume_attachment
     if workitem['params']['operation'] == 'create'
       create
     else
