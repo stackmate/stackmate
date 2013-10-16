@@ -212,6 +212,7 @@ class StackNest < Ruote::Participant
     logger.debug("Deleting stack #{@stack_name}")
     #TODO write code to roll back all stack info
     #Probably nothing needed since new engine launched takes care of it
+    #No, need to clean up if parent stack fails after the nested stack is successfully created
   end
 
   def on_workitem

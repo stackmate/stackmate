@@ -37,6 +37,10 @@ module StackMate
                 puts 'Failed to resolve parameters ' + unresolved.to_s if unresolved
                 print "Sorry, I don't know how to create resources of type: ", unknown, "\n" if unknown
             end
+
+            def self.delete_stack(file,stack_name,params,wait_conditions)
+                
+            end
         #end
     end
 end

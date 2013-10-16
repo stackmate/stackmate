@@ -1,4 +1,4 @@
-require 'stackmate/logging'
+#require 'stackmate/logging'
 require 'stackmate/intrinsic_functions'
 
 module StackMate
@@ -34,9 +34,7 @@ module StackMate
 			'xvdj' => '9',
 		}
 		#comes from awsapi reference
-
 		def get_resolved(lookup_data,workitem)
-			resolved_names = workitem['ResolvedNames']
 			case lookup_data
 			when String
 				 lookup_data

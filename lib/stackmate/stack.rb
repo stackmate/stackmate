@@ -2,6 +2,7 @@ require 'json'
 require 'set'
 require 'tsort'
 require 'stackmate/logging'
+require 'YAML'
 
 module StackMate
 
@@ -43,6 +44,17 @@ class Stacker
         params.each_key do |k|
             populated[k] = params[k]['Default']
         end
+        #Then load local YAML mappings
+        begin
+            #TODO change to use stackid
+            file_name = @stackname+".yml"
+            localized = YAML.load_file(file_name)
+            localized.each_key do |k|
+                populated[k] = localized[k]
+            end
+        rescue 
+            #raise "ERROR : Unable to load end point parameters"
+            p "CAUTION: Unable to load end point parameters"
         #Then override
         overrides.each_key do |k|
             populated[k] = overrides[k]
@@ -89,7 +101,7 @@ class Stacker
                     #TODO Fn::GetAtt
                     if k == "Ref"
                         #only resolve dependencies on other resources for now
-                        if !@param_names.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId' && jsn[k] != 'AWS::StackName'
+                        if !@param_names.keys.index(jsn[k]) && !@resolved.keys.index(jsn[k]) && jsn[k] != 'AWS::Region' && jsn[k] != 'AWS::StackId' && jsn[k] != 'AWS::StackName'
                             deps << jsn[k]
                             #print parent, ": ", deps.to_a, "\n"
                         else if @param_names.keys.index(jsn[k])

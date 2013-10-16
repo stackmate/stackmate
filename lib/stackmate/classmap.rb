@@ -26,6 +26,7 @@ module StackMate
    }
 
    def StackMate.class_for(cf_resource)
+      return cf_resource
        case @profile
          when 'CLOUDSTACK'
            return CS_CLASS_MAP[cf_resource]

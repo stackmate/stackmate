@@ -74,6 +74,11 @@
       }
    },
    "Mappings":{
+      "InstanceLookup":{
+         "m1.large":{
+             "Arch":"XenAppSnapShot"
+          }
+      },
       "RegionMap":{
          "us-east-1":{
             "dc01Ami":"ami-0a4fd163",
@@ -134,62 +139,10 @@
       }
    },
    "Resources":{
-"xaVPCDhcpOptionsAssoc":{
-         "Type":"AWS::EC2::VPCDHCPOptionsAssociation",
-         "Properties":{
-            "VpcId":{
-               "Ref":"xaVPC"
-            },
-            "DhcpOptionsId":{
-               "Ref":"xaDhcpOptions"
-            }
-         }
-      },
-"xaDhcpOptions":{
-         "Type":"AWS::EC2::DHCPOptions",
-         "Properties":{
-            "DomainName":{
-               "Ref":"DomainFQDN"
-            },
-            "DomainNameServers":[
-               {
-                  "Fn::Join":[
-                     ",",
-                     [
-                        {
-                           "Fn::Join":[
-                              ".",
-                              [
-                                 {
-                                    "Ref":"Octet1VPC"
-                                 },
-                                 {
-                                    "Ref":"Octet2VPC"
-                                 },
-                                 {
-                                    "Ref":"PrivateSubnetOct"
-                                 },
-                                 "5"
-                              ]
-                           ]
-                        },
-                        "AmazonProvidedDNS"
-                     ]
-                  ]
-               }
-            ],
-            "Tags":[
-               {
-                  "Key":"Name",
-                  "Value":"XenAppDHCPOptions"
-               }
-            ]
-         }
-      },
       "xaVPC":{
-         "Type":"AWS::EC2::VPC",
+         "Type":"StackMate::CloudStackVPC",
          "Properties":{
-            "CidrBlock":{
+            "cidr":{
                "Fn::Join":[
                   "",
                   [
@@ -213,7 +166,11 @@
                   ]
                ]
             },
-            "InstanceTenancy":"default",
+            "displaytext":"CSStack",
+            "name":{"Ref":"VPCName"},
+            "vpcofferingid":{"Ref":"vpcofferingid"},
+            "zoneid":"88a1e565-bc2a-456b-be99-e95cacc3d069",
+            "fakezoneid" : {"Fn::FindInMap":["RegionMap", {"Ref":"AWS::Region"},{"Fn::FindInMap":["InstanceLookup",{"Ref":"InstanceType"},"Arch"]}]},
             "Tags":[
                {
                   "Key":"Name",

@@ -14,6 +14,10 @@ module StackMate
             fn_select(value)
         when 'Ref'
             fn_ref(value, workitem)
+        when 'Fn::Lookup'
+            fn_lookup(value, workitem)
+        when 'Fn::FindInMap'
+            fn_map(value, workitem)
         end
     end
 
@@ -56,6 +60,29 @@ module StackMate
         else
           workitem['ResolvedNames'][value]
         end
+    end
+
+    def fn_lookup(value, workitem)
+        case value
+        when String
+            workitem['ResolvedNames'][value]
+        when Hash
+            workitem['ResolvedNames'][intrinsic(value, workitem)]
+        end
+    end
+
+    def fn_map(value, workitem)
+        #logger.debug "Intrinsic: fn_ref  value = #{value}"
+        resolved_keys = []
+        value.each do |k|
+            case k
+            when String
+                resolved_keys.push(k)
+            when Hash
+                resolved_keys.push(intrinsic(k,workitem))
+            end
+        end
+        workitem['Mappings'][resolved_keys[0]][resolved_keys[1]][resolved_keys[2]]
     end
 
   end
