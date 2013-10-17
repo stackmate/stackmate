@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'yajl-ruby', '= 1.1.0'
   s.add_runtime_dependency 'netaddr'
 
-  s.add_development_dependency 'json'
-
+  #s.add_development_dependency 'json'
+  s.add_development_dependency 'rspec'
   s.require_path = 'lib'
 end
