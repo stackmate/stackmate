@@ -29,7 +29,7 @@ describe "intrinsic test" do
 
   it "tests Fn::Join" do
     workitem = double("workitem")
-  workitem.stub(:[]) do |arg|
+    workitem.stub(:[]) do |arg|
       if arg == "ResolvedNames"
         @names
       else
@@ -41,7 +41,7 @@ describe "intrinsic test" do
 
   it "tests Fn::Map" do
     workitem = double("workitem")
-  workitem.stub(:[]) do |arg|
+    workitem.stub(:[]) do |arg|
       if arg == "ResolvedNames"
         @names
       elsif arg == "Mappings"
@@ -55,7 +55,7 @@ describe "intrinsic test" do
 
   it "tests Fn::Select" do
     workitem = double("workitem")
-  workitem.stub(:[]) do |arg|
+    workitem.stub(:[]) do |arg|
       if arg == "ResolvedNames"
         @names
       elsif arg == "XenApp VPC"
@@ -68,8 +68,8 @@ describe "intrinsic test" do
   end
 
   it "tests Fn::Select" do
-  workitem = double("workitem")
-  intrinsic({ "Fn::Select" => [ "1", [ "apples", "grapes", "oranges", "mangoes" ] ] }, workitem).should == "grapes"
+    workitem = double("workitem")
+    intrinsic({ "Fn::Select" => [ "1", [ "apples", "grapes", "oranges", "mangoes" ] ] }, workitem).should == "grapes"
   end
 
 end
