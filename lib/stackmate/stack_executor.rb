@@ -32,7 +32,12 @@ class StackExecutor < StackMate::Stacker
     end
 
     def pdef
-        participants = self.strongly_connected_components.flatten
+        begin
+        #participants = self.strongly_connected_components.flatten
+            participants = self.tsort
+        rescue Exception => e
+            raise "ERROR: Cyclic Dependency detected! " + e.message
+        end
         #if we want to skip creating wait conditions (useful for automated tests)
         participants = participants.select { |p|
             StackMate.class_for(@templ['Resources'][p]['Type']) != 'StackMate::WaitCondition'

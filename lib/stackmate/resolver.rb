@@ -34,12 +34,65 @@ module StackMate
 			'xvdj' => '9',
 		}
 		#comes from awsapi reference
+		"boolean"
+ "date"
+ "imageformat"
+ "int"
+ "integer"
+ "list"
+ "long"
+ "map"
+ "set"
+ "short"
+ "state"
+ "string"
+ "tzdate"
+ "uuid"
+		STRINGEXP = /.+/
+		INTEXP = /[0-9]+/
+		UUIDEXP = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+
 		def get_resolved(lookup_data,workitem)
 			case lookup_data
 			when String
 				 lookup_data
 			when Hash
 				 intrinsic(lookup_data,workitem)
+			end
+		end
+
+		def validate_param(value,type)
+			case type
+			when "boolean"
+				["true","false"].include?(value)
+ 			when "date"
+ 				true
+			when "imageformat"
+				["vhd","qcow"].include?(value)
+			when "int"
+				!INTEXP.match(value).nil?
+			when "integer"
+				!INTEXP.match(value).nil?
+			when "list"
+				eval(value).kind_of?(Array)
+			when "long"
+				!INTEXP.match(value).nil?
+			when "map"
+				eval(value).kind_of?(Hash)
+			when "set"
+				eval(value).kind_of?(Array)
+			when "short"
+				!INTEXP.match(value).nil?
+			when "state"
+				true
+			when "string"
+				value.kind_of?(String)
+			when "tzdate"
+				true
+			when "uuid"
+				!UUIDEXP.match(value).nil?
+			else
+				true
 			end
 		end
 

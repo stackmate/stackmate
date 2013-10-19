@@ -2,7 +2,7 @@ require 'json'
 require 'set'
 require 'tsort'
 require 'stackmate/logging'
-require 'YAML'
+require 'yaml'
 
 module StackMate
 
@@ -22,6 +22,7 @@ class Stacker
         @pdeps = {}
         validate_param_values
         resolve_dependencies()
+        validate_dependencies
         @allowed_param_vales = get_allowed_values(@param_names)
         @templ['ResolvedNames'] = populate_parameters(@param_names,@resolved)
         @templ['IdMap'] = {}
@@ -54,16 +55,30 @@ class Stacker
             end
         rescue 
             #raise "ERROR : Unable to load end point parameters"
-            p "CAUTION: Unable to load end point parameters"
+            logger.info("CAUTION: Unable to load end point parameters")
+        end
         #Then override
         overrides.each_key do |k|
             populated[k] = overrides[k]
         end
         populated
     end
+
     def validate_param_values
         #TODO CloudFormation parameters have validity constraints specified
         #Use them to validate parameter values (e.g., email addresses)
+        #As of now used only in actual cloudstack calls
+    end
+
+    def validate_dependencies
+        resources = @deps.keys
+        @deps.each_key do |k|
+            @deps[k].each do |resource|
+                if !resources.include?(resource)
+                    raise "Bad reference or dependency on resource #{resource}"
+                end
+            end
+        end
     end
 
     def resolve_dependencies
