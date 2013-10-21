@@ -62,37 +62,41 @@ module StackMate
 		end
 
 		def validate_param(value,type)
-			case type
-			when "boolean"
-				["true","false"].include?(value)
- 			when "date"
- 				true
-			when "imageformat"
-				["vhd","qcow"].include?(value)
-			when "int"
-				!INTEXP.match(value).nil?
-			when "integer"
-				!INTEXP.match(value).nil?
-			when "list"
-				eval(value).kind_of?(Array)
-			when "long"
-				!INTEXP.match(value).nil?
-			when "map"
-				eval(value).kind_of?(Hash)
-			when "set"
-				eval(value).kind_of?(Array)
-			when "short"
-				!INTEXP.match(value).nil?
-			when "state"
-				true
-			when "string"
-				value.kind_of?(String)
-			when "tzdate"
-				true
-			when "uuid"
-				!UUIDEXP.match(value).nil?
-			else
-				true
+			begin
+				case type
+				when "boolean"
+					["true","false"].include?(value)
+	 			when "date"
+	 				true
+				when "imageformat"
+					["vhd","qcow"].include?(value)
+				when "int"
+					!INTEXP.match(value).nil?
+				when "integer"
+					!INTEXP.match(value).nil?
+				when "list"
+					eval(value).kind_of?(Array)
+				when "long"
+					!INTEXP.match(value).nil?
+				when "map"
+					eval(value).kind_of?(Hash)
+				when "set"
+					eval(value).kind_of?(Array) and eval(value).uniq == eval(value)
+				when "short"
+					!INTEXP.match(value).nil?
+				when "state"
+					true
+				when "string"
+					value.kind_of?(String)
+				when "tzdate"
+					true
+				when "uuid"
+					!UUIDEXP.match(value).nil?
+				else
+					true
+				end
+			rescue Exception => e
+				false
 			end
 		end
 
