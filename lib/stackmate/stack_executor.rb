@@ -11,14 +11,58 @@ module StackMate
 class StackExecutor < StackMate::Stacker
     include Logging
 
-    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts)
+    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts, plugins=nil)
         stackstr = File.read(templatefile)
         super(stackstr, stackname, resolve_param_refs(params, stackname))
         @engine = engine
         @create_wait_conditions = create_wait_conditions
         @api_opts = api_opts
+        load_plugins(plugins)
     end
 
+    def load_plugins(plugins)
+        if !plugins.nil?
+            dirs = plugins.split(",")
+            dirs.each do |dir|
+                if(File.directory?(dir))
+                    Dir[dir+"/*.rb"].each do |file|
+                        begin 
+                            existing_classes = ObjectSpace.each_object(Class).to_a
+                            require file
+                            new_classes =  ObjectSpace.each_object(Class).to_a
+                            added_classes = new_classes - existing_classes
+                            added_classes.each do |plugin_class|
+                                if(plugin_class.class_variable_defined?(:@@stackmate_participant) && plugin_class.class_variable_get(:@@stackmate_participant) == true)
+                                    if(not(plugin_class.method_defined?(:consume_workitem) && plugin_class.ancestors.include?(Ruote::Participant)))
+                                        #http://stackoverflow.com/questions/1901884/loading-unloading-updating-class-in-ruby
+                                        #recursively get class name
+                                        namespace = plugin_class.name.split('::')[0..-2]
+                                        klass = plugin_class.name.split('::')[-1]
+                                        parent = Object
+                                        namespace.each do |p|
+                                            parent = parent.const_get(p.to_sym)
+                                        end
+                                        logger.debug("Removing bad participant defninition #{plugin_class} from #{parent}")
+                                        parent.send(:remove_const,klass.to_sym)
+                                    else
+                                        logger.debug("Adding method on_workitem to class #{plugin_class}")
+                                        plugin_class.class_eval do
+                                            def on_workitem
+                                                consume_workitem
+                                                reply
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        rescue Exception => e
+                            logger.error("Unable to load plugin #{file}. Dangling classes may exist!!") 
+                        end
+                    end
+                end
+            end
+        end
+    end
     def resolve_param_refs(params, stackname)
         resolved_params = {}
         params.split(';').each do |p|
@@ -53,11 +97,11 @@ class StackExecutor < StackMate::Stacker
 
         @engine.register_participant 'Output', StackMate.class_for('Outputs')
         @pdef = Ruote.define @stackname.to_s() do
-            cursor :timeout => '30s', :on_error => 'rollback', :on_timeout => 'rollback' do
+            cursor :timeout => '300s', :on_error => 'rollback', :on_timeout => 'rollback' do
                 participants.collect{ |name| __send__(name, :operation => :create) }
                 __send__('Output')
             end
-            define 'rollback', :timeout => '30s' do
+            define 'rollback', :timeout => '300s' do
                 participants.reverse_each.collect {|name| __send__(name, :operation => :rollback) }
             end
         end
@@ -66,7 +110,6 @@ class StackExecutor < StackMate::Stacker
     def launch
         wfid = @engine.launch( pdef, @templ)
         @engine.wait_for(wfid, :timeout => 600)
-        #p @engine.storage
         logger.error { "engine error : #{@engine.errors.first.message}"} if @engine.errors.first
     end
 end

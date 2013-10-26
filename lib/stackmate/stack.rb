@@ -49,7 +49,7 @@ class Stacker
         begin
             #TODO change to use stackid
             file_name = @stackname+".yml"
-            localized = YAML.load_file(file_name)
+            localized = YAML.load_file("/tmp/"+file_name)
             localized.each_key do |k|
                 populated[k] = localized[k]
             end

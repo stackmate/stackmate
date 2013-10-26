@@ -147,8 +147,13 @@ class CloudStackFactory
         begin
         "
     #get required fields
-    required_fields.each do |required|
+    #treat maps differently
+    required_fields.each do |required,type|
       puts "          args['#{required}'] = get_#{required}"
+    end
+    #populate optional fields
+    optional_fields.each do |optional,type|
+      puts "          args['#{optional}'] = get_#{optional} if @props.has_key?('#{optional}')"
     end
     #raise error if some required field is missing
     puts "  
@@ -158,10 +163,7 @@ class CloudStackFactory
           raise e
         end
         "
-    #populate optional fields
-    optional_fields.each do |optional|
-      puts "        args['#{optional}'] = get_#{optional} if @props.has_key?('#{optional}')"
-    end
+    
     #make API call, populate workitem object
     puts "
         logger.info(\"Creating resource \#{@name} with following arguments\")
@@ -181,6 +183,121 @@ class CloudStackFactory
       end
       "
     puts "
+      def delete
+        logger.debug(\"Deleting resource \#{@name}\")
+        begin
+          physical_id = workitem[@name]['physical_id'] if !workitem[@name].nil?
+          if(!physical_id.nil?)
+            args = {'#{delete_id_tag}' => physical_id
+                  }
+            result_obj = #{delete_request}('#{delete_tag}#{class_name}',args)
+            if (!(result_obj['error'] == true)
+              logger.info(\"Successfully deleted resource \#{@name}\")
+            else
+              logger.info(\"CloudStack error while deleting resource \#{@name}\")
+            end
+          else
+            logger.info(\"Resource #{@name} not created in CloudStack. Skipping delete...\")
+          end
+        rescue Exception => e
+          logger.error(\"Unable to delete resorce \#{@name}\")
+        end
+      end
+
+      def on_workitem
+        @name = workitem.participant_name
+        @props = workitem['Resources'][@name]['Properties']
+        @resolved_names = workitem['ResolvedNames']
+        if workitem['params']['operation'] == 'create'
+          create
+        else
+          delete
+        end
+        reply
+      end
+      "
+        #resolve
+    required_fields.each do |required,type|
+      puts "
+      def get_#{required}
+        resolved_#{required} = get_resolved(@props[\"#{required}\"],workitem)
+        if resolved_#{required}.nil? || !validate_param(resolved_#{required},\"#{type}\")
+          raise \"Missing mandatory parameter #{required} for resource \#{@name}\"
+        end
+        resolved_#{required}
+      end      
+      "
+    end
+      #Just keep separate for now
+    optional_fields.each do |optional,type|
+      puts"
+      def get_#{optional}
+        resolved_#{optional} = get_resolved(@props['#{optional}'],workitem)
+        if resolved_#{optional}.nil? || !validate_param(resolved_#{optional},\"#{type}\")
+          raise \"Malformed optional parameter #{optional} for resource \#{@name}\"
+        end
+        resolved_#{optional}
+      end
+      "
+    end
+    puts "end
+    "
+  end
+
+def self.meta_class(class_name,create_tag,required_fields,optional_fields,create_async,delete_tag,delete_id_tag,delete_async)
+    async={}
+    async[true] = 'make_async_request'
+    async[false] = 'make_sync_request'
+    create_request = async[create_async]
+    delete_request = async[delete_async]
+    str = "   class CloudStack" + class_name + " < CloudStackResource"
+    str = str + "\n
+    include Logging
+    include Intrinsic
+    include Resolver
+      def create
+        logger.debug(\"Creating resource \#{@name}\")
+        workitem[@name] = {}
+        name_cs = workitem['StackName'] + '-' + @name
+        args={}
+        begin
+        "
+    #get required fields
+    required_fields.each do |required,type|
+      str = str + "          args['#{required}'] = get_#{required}\n"
+    end
+    #populate optional fields
+    optional_fields.each do |optional,type|
+      str = str + "          args['#{optional}'] = get_#{optional} if @props.has_key?('#{optional}')\n"
+    end
+    #raise error if some required field is missing
+    str = str + "  
+        rescue Exception => e
+          #logging.error(\"Missing required parameter for resource \#{@name}\")
+          logger.error(e.message)
+          raise e
+        end
+        "
+    
+    #make API call, populate workitem object
+    str = str + "
+        logger.info(\"Creating resource \#{@name} with following arguments\")
+        p args
+        result_obj = #{create_request}('#{create_tag}#{class_name}',args)
+        resource_obj = result_obj['#{class_name}'.downcase]
+        #doing it this way since it is easier to change later, rather than cloning whole object
+        resource_obj.each_key do |k|
+          val = resource_obj[k]
+          if('id'.eql?(k))
+            k = 'physical_id'
+          end
+          workitem[@name][k] = val
+        end
+        workitem['ResolvedNames'][@name] = name_cs
+        workitem['IdMap'][workitem[@name]['physical_id']] = @name
+      end
+      "
+    str = str + "
       def delete
         logger.debug(\"Deleting resource \#{@name}\")
         begin
@@ -215,11 +332,11 @@ class CloudStackFactory
       end
       "
         #resolve
-    required_fields.each do |required|
-      puts "
+    required_fields.each do |required,type|
+      str = str + "
       def get_#{required}
         resolved_#{required} = get_resolved(@props[\"#{required}\"],workitem)
-        if resolved_#{required}.nil?
+        if resolved_#{required}.nil? || !validate_param(resolved_#{required},\"#{type}\")
           raise \"Missing mandatory parameter #{required} for resource \#{@name}\"
         end
         resolved_#{required}
@@ -227,17 +344,21 @@ class CloudStackFactory
       "
     end
       #Just keep separate for now
-    optional_fields.each do |optional|
-      puts"
+    optional_fields.each do |optional,type|
+      str = str + "
       def get_#{optional}
-        get_resolved(@props['#{optional}'],workitem)
+        resolved_#{optional} = get_resolved(@props['#{optional}'],workitem)
+        if resolved_#{optional}.nil? || !validate_param(resolved_#{optional},\"#{type}\")
+          raise \"Malformed optional parameter #{optional} for resource \#{@name}\"
+        end
+        resolved_#{optional}
       end
       "
     end
-    puts "end
+    str = str + "end
     "
+    eval(str)
   end
-
 	#CloudStackFactory.create_class("VPC",{},{})
   #CloudStackFactory.print_class("VPC","create",["name","networkdomain","cidr"],["displaytext","account"],"delete","vpcid")
 end

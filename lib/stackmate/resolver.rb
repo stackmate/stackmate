@@ -34,20 +34,6 @@ module StackMate
 			'xvdj' => '9',
 		}
 		#comes from awsapi reference
-		"boolean"
- "date"
- "imageformat"
- "int"
- "integer"
- "list"
- "long"
- "map"
- "set"
- "short"
- "state"
- "string"
- "tzdate"
- "uuid"
 		STRINGEXP = /.+/
 		INTEXP = /[0-9]+/
 		UUIDEXP = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
@@ -62,6 +48,7 @@ module StackMate
 		end
 
 		def validate_param(value,type)
+			return true
 			begin
 				case type
 				when "boolean"
