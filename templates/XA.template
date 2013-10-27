@@ -421,7 +421,7 @@
                   "dc01Ami"
                ]
             },
-            "UserData":{
+            "userdata":{
                "Fn::Base64":{
                   "Fn::Join":[
                      "&",

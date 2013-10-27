@@ -22,14 +22,15 @@ module StackMate
               'AWS::EC2::NetworkInterface' => 'StackMate::NoOpResource',
               'AWS::EC2::EIP' => 'StackMate::NoOpResource',
               'AWS::EC2::EIPAssociation' => 'StackMate::NoOpResource',
-              'Outputs' => 'StackMate::CloudStackOutput'
+              'Outputs' => 'StackMate::CloudStackOutput',
+              'StackMate::Amogh' => 'StackMate::Amogh'
    }
 
    def StackMate.class_for(cf_resource)
-      return cf_resource
+      #return cf_resource
        case @profile
          when 'CLOUDSTACK'
-           return CS_CLASS_MAP[cf_resource]
+           cf_resource
          when 'NOOP'
            if cf_resource == 'Outputs'
               'StackMate::Output'

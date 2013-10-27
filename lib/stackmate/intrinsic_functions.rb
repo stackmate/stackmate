@@ -18,6 +18,8 @@ module StackMate
             fn_lookup(value, workitem)
         when 'Fn::FindInMap'
             fn_map(value, workitem)
+        when 'Fn::Base64'
+            fn_base64(value, workitem)
         end
     end
 
@@ -85,5 +87,13 @@ module StackMate
         workitem['Mappings'][resolved_keys[0]][resolved_keys[1]][resolved_keys[2]]
     end
 
+    def fn_base64(value, workitem)
+        case value
+            when String
+                Base64.urlsafe_encode64(value)
+            when Hash
+                Base64.urlsafe_encode64(intrinsic(value, workitem))
+        end
+    end
   end
 end

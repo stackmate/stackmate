@@ -165,7 +165,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -473,7 +473,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -569,7 +569,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -689,7 +689,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -790,7 +790,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -892,7 +892,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -1087,7 +1087,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -1318,7 +1318,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -1609,7 +1609,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -1713,7 +1713,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -1837,7 +1837,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -1977,7 +1977,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2098,7 +2098,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2215,7 +2215,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2370,7 +2370,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2464,7 +2464,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2576,7 +2576,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2690,7 +2690,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2825,7 +2825,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -2981,7 +2981,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3091,7 +3091,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3270,7 +3270,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3418,7 +3418,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3528,7 +3528,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3625,7 +3625,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3767,7 +3767,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -3913,7 +3913,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4085,7 +4085,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4178,7 +4178,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4360,7 +4360,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4454,7 +4454,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4563,7 +4563,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4649,7 +4649,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4777,7 +4777,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -4957,7 +4957,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5121,7 +5121,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5297,7 +5297,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5419,7 +5419,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5540,7 +5540,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5660,7 +5660,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5844,7 +5844,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -5957,7 +5957,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -6078,7 +6078,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")
@@ -6194,7 +6194,7 @@ end
             if (!(result_obj['error']==true))
               logger.info("Successfully deleted resource #{@name}")
             else
-              logger.info("CloudStack error while deleting resource #{@name}")
+              logger.error("CloudStack error while deleting resource #{@name}")
             end
           else
             logger.info("Resource  not created in CloudStack. Skipping delete...")

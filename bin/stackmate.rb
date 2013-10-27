@@ -31,6 +31,9 @@ opt_parser = OptionParser.new do |opts|
         puts opts
         exit
     end
+    opts.on("--plugins DIRS",String, "Comman separated plugins directory") do |plugins|
+        options[:plugins] = plugins
+    end
 end
 
 begin
@@ -62,7 +65,7 @@ if options[:file] && stack_name != ''
             StackMate.configure('NOOP') if options[:dry_run]
             opts = {}
             api_opts = {:APIKEY => "#{ENV['APIKEY']}", :SECKEY => "#{ENV['SECKEY']}", :URL => "#{ENV['URL']}" }
-            p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts)
+            p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts, options[:plugins])
             p.launch()
             nil
         end
