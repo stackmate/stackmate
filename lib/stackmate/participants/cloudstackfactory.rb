@@ -155,31 +155,34 @@ class CloudStackFactory
     optional_fields.each do |optional,type|
       puts "          args['#{optional}'] = get_#{optional} if @props.has_key?('#{optional}')"
     end
-    #raise error if some required field is missing
+    
+    #make API call, populate workitem object
+    puts "
+          logger.info(\"Creating resource \#{@name} with following arguments\")
+          p args
+          result_obj = #{create_request}('#{create_tag}#{class_name}',args)
+          resource_obj = result_obj['#{class_name}'.downcase]
+          #doing it this way since it is easier to change later, rather than cloning whole object
+          resource_obj.each_key do |k|
+            val = resource_obj[k]
+            if('id'.eql?(k))
+              k = 'physical_id'
+            end
+            workitem[@name][k] = val
+          end
+          set_tags(@props['tags'],workitem[@name]['physical_id'],\"#{class_name}\") if @props.has_key?('tags')
+          workitem['ResolvedNames'][@name] = name_cs
+          workitem['IdMap'][workitem[@name]['physical_id']] = @name
+        "
+        #raise error if some required field is missing
     puts "  
         rescue Exception => e
-          #logging.error(\"Missing required parameter for resource \#{@name}\")
           logger.error(e.message)
           raise e
         end
         "
-    
-    #make API call, populate workitem object
-    puts "
-        logger.info(\"Creating resource \#{@name} with following arguments\")
-        p args
-        result_obj = #{create_request}('#{create_tag}#{class_name}',args)
-        resource_obj = result_obj['#{class_name}'.downcase]
-        #doing it this way since it is easier to change later, rather than cloning whole object
-        resource_obj.each_key do |k|
-          val = resource_obj[k]
-          if('id'.eql?(k))
-            k = 'physical_id'
-          end
-          workitem[@name][k] = val
-        end
-        workitem['ResolvedNames'][@name] = name_cs
-        workitem['IdMap'][workitem[@name]['physical_id']] = @name
+      #end method 
+      puts"
       end
       "
     puts "
@@ -191,7 +194,7 @@ class CloudStackFactory
             args = {'#{delete_id_tag}' => physical_id
                   }
             result_obj = #{delete_request}('#{delete_tag}#{class_name}',args)
-            if (!(result_obj['error'] == true)
+            if (!(result_obj['error'] == true))
               logger.info(\"Successfully deleted resource \#{@name}\")
             else
               logger.info(\"CloudStack error while deleting resource \#{@name}\")
