@@ -1,5 +1,6 @@
 require 'json'
-require 'cloudstack_ruby_client'
+#require 'cloudstack_ruby_client'
+require 'stackmate/client'
 require 'yaml'
 require 'stackmate/logging'
 require 'stackmate/intrinsic_functions'
@@ -24,7 +25,8 @@ class CloudStackResource < Ruote::Participant
       @url = opts['URL'] || ENV['URL'] or raise ArgumentError.new("CloudStackResources: no URL supplied for CloudStack API")
       @apikey = opts['APIKEY'] || ENV['APIKEY'] or raise ArgumentError.new("CloudStackResources: no api key supplied for CloudStack API")
       @seckey = opts['SECKEY'] || ENV['SECKEY'] or raise ArgumentError.new("CloudStackResources: no secret key supplied for CloudStack API")
-      @client = CloudstackRubyClient::Client.new(@url, @apikey, @seckey, false)
+      #@client = CloudstackRubyClient::Client.new(@url, @apikey, @seckey, false)
+      @client = StackMate::CloudStackClient.new(@url, @apikey, @seckey, false)
   end
 
   def on_workitem
@@ -58,7 +60,8 @@ class CloudStackResource < Ruote::Participant
     def make_sync_request(cmd,args)
         begin
           logger.debug "Going to make sync request #{cmd} to CloudStack server for resource #{@name}"
-          resp = @client.send(cmd, args)
+          #resp = @client.send(cmd, args)
+          resp = @client.api_call(cmd,args)
           return resp
         rescue => e
           logger.error("Failed to make request #{cmd} to CloudStack server while creating resource #{@name}")
@@ -73,7 +76,8 @@ class CloudStackResource < Ruote::Participant
     def make_async_request(cmd, args)
         begin
           logger.debug "Going to make async request #{cmd} to CloudStack server for resource #{@name}"
-          resp = @client.send(cmd, args)
+          #resp = @client.send(cmd, args)
+          resp = @client.api_call(cmd,args)
           jobid = resp['jobid'] if resp
           resp = api_poll(jobid, 3, 3) if jobid
           return resp
@@ -91,7 +95,8 @@ class CloudStackResource < Ruote::Participant
       i = 0 
       loop do 
         break if i > num
-        resp = @client.queryAsyncJobResult({'jobid' => jobid})
+        #resp = @client.queryAsyncJobResult({'jobid' => jobid})
+        resp = @client.api_call("queryAsyncJobResult",{'jobid' => jobid})
         if resp
             return resp['jobresult'] if resp['jobstatus'] == 1
             return {'error' => true} if resp['jobstatus'] == 2
