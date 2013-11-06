@@ -66,12 +66,12 @@ module StackMate
 				end
 			end
 			if !response.is_a?(Net::HTTPOK)
-				if ["431","530"].include?(response.code) and ["9999","4350"].include?(json[resp_title]['cserrorcode'])
+				if ((["431","530"].include?(response.code.to_s)) && (["9999","4350"].include?(json[resp_title]['cserrorcode'].to_s)))
 					raise ArgumentError, json[resp_title]['errortext']
 				end
 
 				raise RuntimeError, json['errorresponse']['errortext'] if response.code == "432"
-				raise Error, "Unable to make request from client " + response.to_s
+				raise Error, "Unable to make request from client due to :" + response.to_s
 				#raise CloudstackRubyClient::RequestError.new(response, json)
 			end
 			json[resp_title]
