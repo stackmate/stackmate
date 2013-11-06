@@ -7,7 +7,6 @@ require 'stackmate/stackpi'
 require 'net/http'
 require 'uri'
 require 'time'
-require 'stackmate/stackglobal'
 
 module StackMate
 

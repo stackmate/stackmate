@@ -1,5 +1,5 @@
 {
-   "AWSTemplateFormatVersion":"2010-09-09",
+   "CSTemplateFormatVersion":"1",
    "Description":"Create a Virtual Private Cloud (VPC) with an instance base for a XenApp farm (Use the Citrix CSP automation pack to complete.) Version 3.2",
    "Parameters":{
       "DomainFQDN":{
@@ -7,36 +7,39 @@
          "Default":"ctxcloud.com",
          "Type":"String"
       },
-      "InstanceType":{
-         "Description":"The type of EC2 instances to be used for worker server members",
-         "Default":"m1.large",
-         "AllowedValues":[
-            "m1.large",
-            "m1.xlarge",
-            "m2.xlarge",
-            "m2.2xlarge",
-            "m2.4xlarge",
-            "c1.xlarge",
-            "cc2.4xlarge",
-            "cc2.8xlarge"
-         ],
-         "Type":"String"
-      },
       "VPCName":{
-         "Default":"XenApp VPC",
+         "Default":"Test VPC",
          "Description":"The name of the Virtual Private Cloud",
          "Type":"String"
       },
-      "StartingWorkerServers":{
-         "Description":"Enter the default number of XenApp worker servers to create. These will always be on!",
-         "Default":2,
-         "Type":"Number",
-         "MinValue":"0",
-         "MaxValue":"10"
+      "zoneid":{
+         "Default":"37182c61-455a-4080-8bc7-9a733ecf543f",
+         "Description":"ID of the zone to create stack",
+         "Type":"String"
       },
-      "AvailabilityZonePref":{
-         "Description":"The availability zone within the Region that you want to place the VPC within. Example: us-east-1c",
-         "Default":"",
+      "templateid":{
+         "Default":"ecfb1510-3dca-11e3-af27-bb6ae22c368c",
+         "Description":"ID of the VM template ",
+         "Type":"String"
+      },
+      "serviceofferingid":{
+         "Default":"1",
+         "Description":"ID of the serviceoffering ",
+         "Type":"String"
+      },
+      "vpcofferingid":{
+         "Default":"1",
+         "Description":"ID of the vpc ",
+         "Type":"String"
+      },
+      "networkofferingidpub":{
+         "Default":"ca05e6b9-d04f-44ce-8e9c-fb22b7846cb2",
+         "Description":"ID of the network offering for public network ",
+         "Type":"String"
+      },
+      "networkofferingidpri":{
+         "Default":"ca05e6b9-d04f-44ce-8e9c-fb22b7846cb2",
+         "Description":"ID of the network offering for private network",
          "Type":"String"
       },
       "Octet1VPC":{
@@ -66,70 +69,12 @@
          "Type":"Number",
          "MinValue":"0",
          "MaxValue":"254"
-      },
-      "NSCloudFormationURL":{
-         "Default":"https://cf-templates-5tx1cix0h0y1-us-east-1.s3.amazonaws.com/2013059tvE-NS_VPX_Tempate_v3.json",
-         "Description":"The public URL for the NetScaler VPX CloudFormation Template",
-         "Type":"String"
       }
    },
    "Mappings":{
       "RegionMap":{
-         "us-east-1":{
-            "dc01Ami":"ecfb1510-3dca-11e3-af27-bb6ae22c368c",
-            "w2k8Ami":"ecfb1510-3dca-11e3-af27-bb6ae22c368c",
-            "xaAmi":"ecfb1510-3dca-11e3-af27-bb6ae22c368c",
-            "natAmi":"ecfb1510-3dca-11e3-af27-bb6ae22c368c",
-            "XenAppSnapShot":"6064f2be-c6c4-4507-a93f-414d999e521a"
-         },
-         "us-west-1":{
-            "dc01Ami":"ami-be5e73fb",
-            "w2k8Ami":"ami-885875cd",
-            "xaAmi":"ami-885875cd",
-            "natAmi":"ami-c7cc9e82",
-            "XenAppSnapShot":"snap-f96769d6"
-         },
-         "us-west-2":{
-            "dc01Ami":"ami-68009558",
-            "w2k8Ami":"ami-9e0d98ae",
-            "xaAmi":"ami-9e0d98ae",
-            "natAmi":"ami-6eff725e",
-            "XenAppSnapShot":"snap-866c68ed"
-         },
-         "eu-west-1":{
-            "dc01Ami":"ami-649a9110",
-            "w2k8Ami":"ami-3a9f944e",
-            "xaAmi":"ami-3a9f944e",
-            "natAmi":"ami-095b6c7d",
-            "XenAppSnapShot":"snap-e3ece188"
-         },
-         "ap-southeast-1":{
-            "dc01Ami":"ami-f00945a2",
-            "w2k8Ami":"ami-820945d0",
-            "xaAmi":"ami-820945d0",
-            "natAmi":"ami-00eb9352",
-            "XenAppSnapShot":"snap-e7ff5388"
-         },
-         "ap-southeast-2":{
-            "dc01Ami":"ami-ca76e7f0",
-            "w2k8Ami":"ami-3a79e800",
-            "xaAmi":"ami-3a79e800",
-            "natAmi":"ami-a1980f9b",
-            "XenAppSnapShot":"snap-de4e2fee"
-         },
-         "ap-northeast-1":{
-            "dc01Ami":"ami-4d78f94c",
-            "w2k8Ami":"ami-5f01805e",
-            "xaAmi":"ami-5f01805e",
-            "natAmi":"ami-12d86d13",
-            "XenAppSnapShot":"snap-93a202fd"
-         },
-         "sa-east-1":{
-            "dc01Ami":"ami-8b2af196",
-            "w2k8Ami":"ami-5b29f246",
-            "xaAmi":"ami-5b29f246",
-            "natAmi":"ami-0439e619",
-            "XenAppSnapShot":"snap-cf7a00a7"
+         "37182c61-455a-4080-8bc7-9a733ecf543f":{
+            "XenAppSnapShot":"e7524a5b-1ef1-4b01-894b-49cdade8063a"
          }
       }
    },
@@ -161,14 +106,14 @@
                   ]
                ]
             },
-            "vpcofferingid":{"Fn::Lookup":"vpcofferingid"},
+            "vpcofferingid":{"Ref":"vpcofferingid"},
             "networkdomain":{
                "Ref":"DomainFQDN"
             },
             "name":{"Ref":"VPCName"},
             "displaytext":{"Ref":"VPCName"},
-            "zoneid":{"Fn::Lookup":"zoneid"},
-            "Tags":[
+            "zoneid":{"Ref":"zoneid"},
+            "tags":[
                {
                   "Key":"Name",
                   "Value":{
@@ -181,18 +126,7 @@
       "NATSecurityGroup":{
          "Type":"StackMate::CloudStackSecurityGroup",
          "Properties":{
-            "name":"NAT Security Group",
-            "vpcid":{
-               "Ref":"xaVPC"
-            },
-            "SecurityGroupIngress":[
-               {
-                  "IpProtocol":"tcp",
-                  "FromPort":"22",
-                  "ToPort":"22",
-                  "CidrIp":"0.0.0.0/0"
-               }
-            ]
+            "name":"NAT Security Group"
          }
       },
       "NSecurityGroupIngress1":{
@@ -208,10 +142,7 @@
       "PublicSecurityGroup":{
          "Type":"StackMate::CloudStackSecurityGroup",
          "Properties":{
-            "name":"Public Security Group",
-            "vpcid":{
-               "Ref":"xaVPC"
-            }
+            "name":"Public Security Group"
          }
       },
       "PuSecurityGroupEgress1":{
@@ -287,10 +218,7 @@
       "PrivateSecurityGroup":{
          "Type":"StackMate::CloudStackSecurityGroup",
          "Properties":{
-            "name":"Private Security Group",
-            "vpcid":{
-               "Ref":"xaVPC"
-            }
+            "name":"Private Security Group"
          }
       },
       "PublicSubnet":{
@@ -305,8 +233,8 @@
             "netmask" : "255.255.255.0",
             "name" : "publicnetworkvpc",
             "displaytext" : "public network for xa",
-            "networkofferingid" : {"Fn::Lookup" : "networkofferingidpub"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"}
+            "networkofferingid" : {"Ref" : "networkofferingidpub"},
+            "zoneid" : {"Ref" : "zoneid"}
          }
       },
       "PrivateSubnet":{
@@ -321,8 +249,8 @@
             "netmask" : "255.255.255.0",
             "name" : "privatenetworkvpc",
             "displaytext" : "private network for xa",
-            "networkofferingid" : {"Fn::Lookup" : "networkofferingidpri"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"}
+            "networkofferingid" : {"Ref" : "networkofferingidpri"},
+            "zoneid" : {"Ref" : "zoneid"}
          }
       },
       "PublicNetworkAcl":{
@@ -346,24 +274,19 @@
       "DomainController":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
-            "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.5",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
-            "SecurityGroupIds":
+            "tags":[
                {
-                  "Ref":"PrivateSecurityGroup"
+                  "key":"Name",
+                  "value":"InternetNAT"
                }
-            ,
+            ],
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
+            "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.5",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "dc01Ami"
-               ]
+               "Ref":"templateid"
             },
-            "UserData":{
+            "userdata":{
                "Fn::Base64":{
                   "Fn::Join":[
                      "=",
@@ -381,45 +304,22 @@
       "NATInstance":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "natAmi"
-               ]
+               "Ref":"templateid"
             },
-            "SourceDestCheck":"false",
-            "SecurityGroupIds":
-               {
-                  "Ref":"NATSecurityGroup"
-               }
-            ,
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.0.18",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PublicSubnet"}]]}]]}
          }
       },
       "Bastion":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
-            "SecurityGroupIds":
-               {
-                  "Ref":"PublicSecurityGroup"
-               }
-            ,
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.0.6",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PublicSubnet"}]]}]]},
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "dc01Ami"
-               ]
+               "Ref":"templateid"
             },
             "userdata":{
                "Fn::Base64":{
@@ -453,24 +353,13 @@
       "XenApp":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.6",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
-            "SecurityGroupIds":
-               {
-                  "Ref":"PrivateSecurityGroup"
-               }
-            ,
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "w2k8Ami"
-               ]
+               "Ref":"templateid"
             },
-            "UserData":{
+            "userdata":{
                "Fn::Base64":{
                   "Fn::Join":[
                      "&",
@@ -549,24 +438,13 @@
       "XenAppBDC":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
-            "SecurityGroupIds":
-               {
-                  "Ref":"PrivateSecurityGroup"
-               }
-            ,
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "w2k8Ami"
-               ]
+               "Ref":"templateid"
             },
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.7",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
-            "UserData":{
+            "userdata":{
                "Fn::Base64":{
                   "Fn::Join":[
                      "&",
@@ -645,24 +523,13 @@
       "XenAppSF":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
-            "SecurityGroupIds":
-               {
-                  "Ref":"PrivateSecurityGroup"
-               }
-            ,
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "w2k8Ami"
-               ]
+               "Ref":"templateid"
             },
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.8",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
-            "UserData":{
+            "userdata":{
                "Fn::Base64":{
                   "Fn::Join":[
                      "&",
@@ -741,24 +608,13 @@
       "InstallServer":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
-            "serviceofferingid" : {"Fn::Lookup" : "serviceofferingid"},
-            "zoneid" : {"Fn::Lookup" : "zoneid"},
-            "SecurityGroupIds":
-               {
-                  "Ref":"PrivateSecurityGroup"
-               }
-            ,
+            "serviceofferingid" : {"Ref" : "serviceofferingid"},
+            "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "w2k8Ami"
-               ]
+               "Ref":"templateid"
             },
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.9",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
-            "UserData":{
+            "userdata":{
                "Fn::Base64":{
                   "Fn::Join":[
                      "&",
@@ -838,12 +694,12 @@
          "Type":"StackMate::CloudStackVolume",
          "Properties":{
             "name" : "XenAppDVD",
-            "zoneid":{"Fn::Lookup":"zoneid"},
+            "zoneid":{"Ref":"zoneid"},
             "snapshotid":{
                "Fn::FindInMap":[
                   "RegionMap",
                   {
-                     "Ref":"AWS::Region"
+                     "Ref":"zoneid"
                   },
                   "XenAppSnapShot"
                ]

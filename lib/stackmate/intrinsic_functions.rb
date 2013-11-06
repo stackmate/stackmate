@@ -1,3 +1,12 @@
+class Hash
+  def downcase_key
+    keys.each do |k|
+      store(k.downcase, Array === (v = delete(k)) ? v.map(&:downcase_key) : v)
+    end
+    self
+  end
+end
+
 module StackMate
   module Intrinsic
 
@@ -46,6 +55,12 @@ module StackMate
         attribute = array_value[1]
         #logger.debug "Intrinsic: fn_getatt  resource= #{resource} attrib = #{attribute} wi[Resource] = #{workitem[resource]}"
         workitem[resource][attribute]
+        # attributes = array_value[1..-2]
+        # current_resource = workitem[resource]
+        # attributes.each do |a|
+        #     current_resource = current_resource[a]
+        # end
+        # current_resource[array_value[-1]]
     end
 
     def fn_select(array_value)

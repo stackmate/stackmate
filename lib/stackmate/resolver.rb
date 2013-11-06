@@ -62,13 +62,16 @@ module StackMate
 				when "integer"
 					!INTEXP.match(value).nil?
 				when "list"
-					eval(value).kind_of?(Array)
+					#eval(value).kind_of?(Array)
+					true
 				when "long"
 					!INTEXP.match(value).nil?
 				when "map"
-					eval(value).kind_of?(Hash)
+					#eval(value).kind_of?(Hash)
+					true
 				when "set"
-					eval(value).kind_of?(Array) and eval(value).uniq == eval(value)
+					#eval(value).kind_of?(Array) and eval(value).uniq == eval(value)
+					true
 				when "short"
 					!INTEXP.match(value).nil?
 				when "state"
@@ -99,6 +102,17 @@ module StackMate
         		end
         	end
         	result
+		end
+
+		def resolve_tags(tags_array,workitem)
+			result = {}
+			tags_array.each do |tag|
+				k = tag['key']
+				v = tag['value']
+				resolved_v = get_resolved(v,workitem)
+				result[k] = resolved_v
+			end
+			result
 		end
 
 		def resolve_to_deviceid(devicename)
