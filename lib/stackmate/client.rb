@@ -71,7 +71,7 @@ module StackMate
 				end
 
 				raise RuntimeError, json['errorresponse']['errortext'] if response.code == "432"
-				raise Error, "Unable to make request from client due to :" + response.to_s
+				raise RuntimeError, "Unable to make request from client due to :" + response.to_s
 				#raise CloudstackRubyClient::RequestError.new(response, json)
 			end
 			json[resp_title]
