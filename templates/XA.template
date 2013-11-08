@@ -8,37 +8,31 @@
          "Type":"String"
       },
       "VPCName":{
-         "Default":"Test VPC",
+         "Default":"XenApp VPC",
          "Description":"The name of the Virtual Private Cloud",
          "Type":"String"
       },
       "zoneid":{
-         "Default":"37182c61-455a-4080-8bc7-9a733ecf543f",
          "Description":"ID of the zone to create stack",
          "Type":"String"
       },
       "templateid":{
-         "Default":"ecfb1510-3dca-11e3-af27-bb6ae22c368c",
          "Description":"ID of the VM template ",
          "Type":"String"
       },
       "serviceofferingid":{
-         "Default":"1",
          "Description":"ID of the serviceoffering ",
          "Type":"String"
       },
       "vpcofferingid":{
-         "Default":"1",
-         "Description":"ID of the vpc ",
+         "Description":"ID of the vpc offering",
          "Type":"String"
       },
       "networkofferingidpub":{
-         "Default":"ca05e6b9-d04f-44ce-8e9c-fb22b7846cb2",
          "Description":"ID of the network offering for public network ",
          "Type":"String"
       },
       "networkofferingidpri":{
-         "Default":"ca05e6b9-d04f-44ce-8e9c-fb22b7846cb2",
          "Description":"ID of the network offering for private network",
          "Type":"String"
       },
@@ -69,13 +63,6 @@
          "Type":"Number",
          "MinValue":"0",
          "MaxValue":"254"
-      }
-   },
-   "Mappings":{
-      "RegionMap":{
-         "37182c61-455a-4080-8bc7-9a733ecf543f":{
-            "XenAppSnapShot":"e7524a5b-1ef1-4b01-894b-49cdade8063a"
-         }
       }
    },
    "Resources":{
@@ -280,6 +267,7 @@
                   "value":"InternetNAT"
                }
             ],
+            "name" : "DomainController",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.5",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
@@ -304,6 +292,7 @@
       "NATInstance":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
+            "name" : "NATInstance",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
@@ -315,6 +304,7 @@
       "Bastion":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
+            "name" : "Bastion",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.0.6",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PublicSubnet"}]]}]]},
@@ -353,6 +343,7 @@
       "XenApp":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
+            "name" : "XenAppInstance",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "iptonetworklist":{"Fn::Join":["&",["iptonetworklist[0].ip=10.0.1.6",{"Fn::Join":["=",["iptonetworklist[0].networkid",{"Ref":"PrivateSubnet"}]]}]]},
@@ -438,6 +429,7 @@
       "XenAppBDC":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
+            "name" : "XenAppBDC",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
@@ -523,6 +515,7 @@
       "XenAppSF":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
+            "name" : "XenAppSF",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
@@ -608,6 +601,7 @@
       "InstallServer":{
          "Type":"StackMate::CloudStackVirtualMachine",
          "Properties":{
+            "name" : "InstallServer",
             "serviceofferingid" : {"Ref" : "serviceofferingid"},
             "zoneid" : {"Ref" : "zoneid"},
             "templateid":{
@@ -689,35 +683,7 @@
                }
             }
          }
-      },
-      "XenAppDVD":{
-         "Type":"StackMate::CloudStackVolume",
-         "Properties":{
-            "name" : "XenAppDVD",
-            "zoneid":{"Ref":"zoneid"},
-            "snapshotid":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"zoneid"
-                  },
-                  "XenAppSnapShot"
-               ]
-            }
-         }
-      },
-      "DVDAttachment":{
-         "Type":"StackMate::CloudStackVolumeOps",
-         "Properties":{
-            "id":{
-               "Ref":"XenAppDVD"
-            },
-            "virtualmachineid":{
-               "Ref":"InstallServer"
-            },
-            "deviceid":"7"
-         }
-      }     
+      }   
    },
    "Outputs":{
       "Bastion":{
@@ -725,7 +691,7 @@
          "Value":{
             "Fn::GetAtt":[
                "Bastion",
-               "publicip"
+               "PrivateIp"
             ]
          }
       },
@@ -734,7 +700,7 @@
          "Value":{
             "Fn::GetAtt":[
                "DomainController",
-               "publicip"
+               "PrivateIp"
             ]
          }
       },
@@ -743,7 +709,7 @@
          "Value":{
             "Fn::GetAtt":[
                "XenApp",
-               "publicip"
+               "PrivateIp"
             ]
          }
       },
@@ -752,7 +718,7 @@
          "Value":{
             "Fn::GetAtt":[
                "XenAppBDC",
-               "publicip"
+               "PrivateIp"
             ]
          }
       },
@@ -761,7 +727,7 @@
          "Value":{
             "Fn::GetAtt":[
                "XenAppSF",
-               "publicip"
+               "PrivateIp"
             ]
          }
       },
@@ -770,7 +736,7 @@
          "Value":{
             "Fn::GetAtt":[
                "InstallServer",
-               "publicip"
+               "PrivateIp"
             ]
          }
       }

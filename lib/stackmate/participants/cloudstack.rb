@@ -178,6 +178,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -300,6 +301,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -403,6 +405,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -507,6 +510,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -640,7 +644,7 @@ end
         
           args['displaytext'] = get_displaytext
           args['ostypeid'] = get_ostypeid
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['snapshotid'] = get_snapshotid if @props.has_key?('snapshotid')
           args['details'] = get_details if @props.has_key?('details')
           args['virtualmachineid'] = get_virtualmachineid if @props.has_key?('virtualmachineid')
@@ -704,6 +708,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -864,7 +869,7 @@ end
         
           args['displaytext'] = get_displaytext
           args['networkofferingid'] = get_networkofferingid
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['zoneid'] = get_zoneid
           args['networkdomain'] = get_networkdomain if @props.has_key?('networkdomain')
           args['projectid'] = get_projectid if @props.has_key?('projectid')
@@ -937,6 +942,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -1230,6 +1236,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -1280,7 +1287,7 @@ end
         args={}
         begin
         
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['type'] = get_type
           args['domainid'] = get_domainid if @props.has_key?('domainid')
           args['account'] = get_account if @props.has_key?('account')
@@ -1336,6 +1343,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -1462,6 +1470,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -1548,7 +1557,7 @@ end
         args={}
         begin
         
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['description'] = get_description if @props.has_key?('description')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
           args['account'] = get_account if @props.has_key?('account')
@@ -1604,6 +1613,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -1672,7 +1682,7 @@ end
         args={}
         begin
         
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['account'] = get_account if @props.has_key?('account')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
           args['projectid'] = get_projectid if @props.has_key?('projectid')
@@ -1727,6 +1737,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -1789,7 +1800,7 @@ end
           args['regionid'] = get_regionid
           args['gslbservicetype'] = get_gslbservicetype
           args['gslbdomainname'] = get_gslbdomainname
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['account'] = get_account if @props.has_key?('account')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
           args['gslbstickysessionmethodname'] = get_gslbstickysessionmethodname if @props.has_key?('gslbstickysessionmethodname')
@@ -1846,6 +1857,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2003,6 +2015,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2047,7 +2060,7 @@ end
           args['virtualmachineid'] = get_virtualmachineid
           args['description'] = get_description if @props.has_key?('description')
           args['snapshotmemory'] = get_snapshotmemory if @props.has_key?('snapshotmemory')
-          args['name'] = get_name if @props.has_key?('name')
+          args['name'] = workitem['StackName'] +'-' + get_name if @props.has_key?('name')
 
           logger.info("Creating resource #{@name} with following arguments")
           p args
@@ -2099,6 +2112,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2213,6 +2227,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2329,6 +2344,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2411,7 +2427,7 @@ end
           args['algorithm'] = get_algorithm
           args['networkid'] = get_networkid
           args['sourceipaddressnetworkid'] = get_sourceipaddressnetworkid
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['instanceport'] = get_instanceport
           args['description'] = get_description if @props.has_key?('description')
           args['sourceipaddress'] = get_sourceipaddress if @props.has_key?('sourceipaddress')
@@ -2466,6 +2482,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2580,7 +2597,7 @@ end
           args['diskofferingid'] = get_diskofferingid if @props.has_key?('diskofferingid')
           args['hypervisor'] = get_hypervisor if @props.has_key?('hypervisor')
           args['keyboard'] = get_keyboard if @props.has_key?('keyboard')
-          args['name'] = get_name if @props.has_key?('name')
+          args['name'] = workitem['StackName'] +'-' + get_name if @props.has_key?('name')
           #args['iptonetworklist'] = get_iptonetworklist if @props.has_key?('iptonetworklist')
           if @props.has_key?('iptonetworklist')
             ipnetworklist = get_iptonetworklist
@@ -2657,6 +2674,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -2915,7 +2933,7 @@ end
         begin
         
           args['vpcid'] = get_vpcid
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['description'] = get_description if @props.has_key?('description')
 
           logger.info("Creating resource #{@name} with following arguments")
@@ -2968,6 +2986,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3080,6 +3099,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3261,6 +3281,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3410,6 +3431,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3460,7 +3482,7 @@ end
         args={}
         begin
         
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['account'] = get_account if @props.has_key?('account')
           args['projectid'] = get_projectid if @props.has_key?('projectid')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
@@ -3515,6 +3537,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3627,6 +3650,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3726,6 +3750,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3870,6 +3895,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -3963,7 +3989,7 @@ end
           args['gateway'] = get_gateway
           args['esplifetime'] = get_esplifetime if @props.has_key?('esplifetime')
           args['dpd'] = get_dpd if @props.has_key?('dpd')
-          args['name'] = get_name if @props.has_key?('name')
+          args['name'] = workitem['StackName'] +'-' + get_name if @props.has_key?('name')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
           args['ikelifetime'] = get_ikelifetime if @props.has_key?('ikelifetime')
           args['account'] = get_account if @props.has_key?('account')
@@ -4018,6 +4044,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4192,6 +4219,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4287,6 +4315,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4471,6 +4500,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4567,6 +4597,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4678,6 +4709,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4766,6 +4798,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -4896,6 +4929,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5020,7 +5054,7 @@ end
         
           args['cidr'] = get_cidr
           args['zoneid'] = get_zoneid
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['vpcofferingid'] = get_vpcofferingid
           args['displaytext'] = get_displaytext
           args['projectid'] = get_projectid if @props.has_key?('projectid')
@@ -5183,7 +5217,7 @@ end
         args={}
         begin
         
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['maxiops'] = get_maxiops if @props.has_key?('maxiops')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
           args['projectid'] = get_projectid if @props.has_key?('projectid')
@@ -5248,6 +5282,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5423,6 +5458,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5517,6 +5553,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5614,6 +5651,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5741,6 +5779,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5892,6 +5931,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -5960,7 +6000,7 @@ end
         args={}
         begin
         
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['displaytext'] = get_displaytext
           args['account'] = get_account if @props.has_key?('account')
           args['domainid'] = get_domainid if @props.has_key?('domainid')
@@ -6015,6 +6055,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -6076,7 +6117,7 @@ end
         
           args['publicport'] = get_publicport
           args['privateport'] = get_privateport
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['algorithm'] = get_algorithm
           args['description'] = get_description if @props.has_key?('description')
           args['networkid'] = get_networkid if @props.has_key?('networkid')
@@ -6137,6 +6178,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -6323,6 +6365,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -6384,7 +6427,7 @@ end
         
           args['methodname'] = get_methodname
           args['lbruleid'] = get_lbruleid
-          args['name'] = get_name
+          args['name'] = workitem['StackName'] +'-' + get_name
           args['param'] = get_param if @props.has_key?('param')
           args['description'] = get_description if @props.has_key?('description')
 
@@ -6438,6 +6481,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -6561,6 +6605,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -6679,6 +6724,7 @@ end
       def on_workitem
         @name = workitem.participant_name
         @props = workitem['Resources'][@name]['Properties']
+        @props.downcase_key
         @resolved_names = workitem['ResolvedNames']
         if workitem['params']['operation'] == 'create'
           create
@@ -6964,10 +7010,6 @@ class CloudStackOutput < Ruote::Participant
   end
 
 end
-
-
-
-    
 
 
 end

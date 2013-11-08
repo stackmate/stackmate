@@ -25,6 +25,7 @@ class Stacker
         validate_dependencies
         @allowed_param_vales = get_allowed_values(@param_names)
         @templ['ResolvedNames'] = populate_parameters(@param_names,@resolved)
+        #@templ['ResolvedNames']['StackId'] = SecureRandom.urlsafe_base64
         @templ['IdMap'] = {}
     end
 
@@ -48,8 +49,9 @@ class Stacker
         #Then load local YAML mappings
         begin
             #TODO change to use stackid
-            file_name = @stackname+".yml"
-            localized = YAML.load_file("/tmp/"+file_name)
+            #file_name = @stackname+".yml"
+            file_name = "local.yml"
+            localized = YAML.load_file(file_name)
             localized.each_key do |k|
                 populated[k] = localized[k]
             end
@@ -91,6 +93,7 @@ class Stacker
             @deps[key] = deps.to_a
             @pdeps[key] = pdeps.to_a
         }
+        unresolved = []
         @pdeps.keys.each do |k|
             unres = @pdeps[k] - @resolved.keys
             if ! unres.empty?
@@ -100,9 +103,11 @@ class Stacker
                     @resolved[u] = deflt if deflt
                 end
                 unres = @pdeps[k] - @resolved.keys
-                throw :unresolved, (@pdeps[k] - @resolved.keys) if !unres.empty?
+                unresolved = unresolved + unres
+                #throw :unresolved, (@pdeps[k] - @resolved.keys) if !unres.empty?
             end
         end
+        throw :unresolved, unresolved.uniq if !unresolved.empty?
     end
 
 

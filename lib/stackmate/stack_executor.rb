@@ -65,9 +65,13 @@ class StackExecutor < StackMate::Stacker
     end
     def resolve_param_refs(params, stackname)
         resolved_params = {}
-        params.split(';').each do |p|
-           i = p.split('=')
-           resolved_params[i[0]] = i[1]
+        begin
+            params.split(';').each do |p|
+                i = p.split('=')
+                resolved_params[i[0]] = i[1]
+            end
+        rescue 
+            #minimum parameters??
         end
         resolved_params['AWS::Region'] = 'us-east-1' #TODO handle this better
         resolved_params['AWS::StackName'] = stackname
