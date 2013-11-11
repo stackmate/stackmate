@@ -8,7 +8,7 @@ describe "intrinsic test" do
     @mappings = {"InstanceLookup"=>{"m1.large"=>{"Arch"=>"XenAppSnapShot"}}, "RegionMap"=>{"us-east-1"=>{"dc01Ami"=>"ami-0a4fd163", "w2k8Ami"=>"ami-deb22cb7", "xaAmi"=>"ami-deb22cb7", "natAmi"=>"ami-d8699bb1", "XenAppSnapShot"=>"snap-f277618d"}, "us-west-1"=>{"dc01Ami"=>"ami-be5e73fb", "w2k8Ami"=>"ami-885875cd", "xaAmi"=>"ami-885875cd", "natAmi"=>"ami-c7cc9e82", "XenAppSnapShot"=>"snap-f96769d6"}, "us-west-2"=>{"dc01Ami"=>"ami-68009558", "w2k8Ami"=>"ami-9e0d98ae", "xaAmi"=>"ami-9e0d98ae", "natAmi"=>"ami-6eff725e", "XenAppSnapShot"=>"snap-866c68ed"}, "eu-west-1"=>{"dc01Ami"=>"ami-649a9110", "w2k8Ami"=>"ami-3a9f944e", "xaAmi"=>"ami-3a9f944e", "natAmi"=>"ami-095b6c7d", "XenAppSnapShot"=>"snap-e3ece188"}, "ap-southeast-1"=>{"dc01Ami"=>"ami-f00945a2", "w2k8Ami"=>"ami-820945d0", "xaAmi"=>"ami-820945d0", "natAmi"=>"ami-00eb9352", "XenAppSnapShot"=>"snap-e7ff5388"}, "ap-southeast-2"=>{"dc01Ami"=>"ami-ca76e7f0", "w2k8Ami"=>"ami-3a79e800", "xaAmi"=>"ami-3a79e800", "natAmi"=>"ami-a1980f9b", "XenAppSnapShot"=>"snap-de4e2fee"}, "ap-northeast-1"=>{"dc01Ami"=>"ami-4d78f94c", "w2k8Ami"=>"ami-5f01805e", "xaAmi"=>"ami-5f01805e", "natAmi"=>"ami-12d86d13", "XenAppSnapShot"=>"snap-93a202fd"}, "sa-east-1"=>{"dc01Ami"=>"ami-8b2af196", "w2k8Ami"=>"ami-5b29f246", "xaAmi"=>"ami-5b29f246", "natAmi"=>"ami-0439e619", "XenAppSnapShot"=>"snap-cf7a00a7"}}}
     @resource = {"physical_id" => "uuid-something-1234"}
   end
-  
+
   it "tests Ref function for parameter" do
     workitem = double("workitem")
     workitem.stub(:[]) do |arg|
@@ -18,7 +18,7 @@ describe "intrinsic test" do
         nil
       end
     end
-  intrinsic({"Ref" => "VPCName"},workitem).should == "XenApp VPC"  
+    intrinsic({"Ref" => "VPCName"},workitem).should == "XenApp VPC"
   end
 
   it "tests Ref function for resource" do
