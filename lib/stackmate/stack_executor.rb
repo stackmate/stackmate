@@ -6,6 +6,12 @@ require 'stackmate/classmap'
 require 'stackmate/participants/cloudstack'
 require 'stackmate/participants/common'
 
+Dir[File.dirname(__FILE__) + "/participants/*.rb"].each do |participant|
+  if(participant.include?("cloudstack_"))
+    require participant
+  end
+end
+
 module StackMate
 
   class StackExecutor < StackMate::Stacker
