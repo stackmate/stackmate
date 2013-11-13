@@ -7,26 +7,26 @@ require 'stackmate/participants/common'
 
 module StackMate
 
-class WaitConditionServer < Sinatra::Base
-  set :static, false
-  set :run, true
+  class WaitConditionServer < Sinatra::Base
+    set :static, false
+    set :run, true
 
-  def initialize()
+    def initialize()
       super
-  end
-
-  put '/waitcondition/:wfeid/:waithandle' do
-    #print "Got PUT of " , params[:wfeid],  ", name = ", params[:waithandle], "\n"
-    WaitCondition.get_conditions.each  do |w|
-      w.set_handle(params[:waithandle].to_s)
     end
-    'success
+
+    put '/waitcondition/:wfeid/:waithandle' do
+      #print "Got PUT of " , params[:wfeid],  ", name = ", params[:waithandle], "\n"
+      WaitCondition.get_conditions.each  do |w|
+        w.set_handle(params[:waithandle].to_s)
+      end
+      'success
     '
+    end
+
+
+    run! if app_file == $0
+
   end
-
-
-  run! if app_file == $0
-
-end
 
 end

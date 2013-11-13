@@ -102,6 +102,15 @@ If you don't want the wait condition server to run, just use '-n'. Stackmate wil
 
 If you want to validate your template, you can use the --dry-run option. This will parse and validate the template and create an execution schedule.
 
+StackMate allows you to define your own participants that will be called based on the template namespace. For example, you can define a class Foo::Bar
+and use Foo::Bar as a "Type" in the template. The requirement is :
+(1) It should contain a class variable @@stackmate_participant set to true so as to register with StackMate
+(2) Foo::Bar should have Ruote::Participant as its ancestor
+(3) Foo::Bar should have a method named "consume_workitem" that defines actions to be taken when called with workitem.
+
+Use --plugins <Directories with ruby files> to add plugins. This has undergone limited testing
+
+
 ## TODO
 * Parallelize (with ruote concurrence) where possible
 * rollback on error

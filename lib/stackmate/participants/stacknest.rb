@@ -1,0 +1,6 @@
+require 'json'
+require 'cloudstack_ruby_client'
+require 'yaml'
+require 'stackmate/logging'
+require 'stackmate/intrinsic_functions'
+require 'stackmate/resolver'
