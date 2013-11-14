@@ -14,10 +14,13 @@ module StackMate
     #return cf_resource
     case @profile
     when 'CLOUDSTACK'
-      if(cf_resource.start_with?("StackMate::"))
-        cf_resource
-      else
+      if(cf_resource.start_with?("CloudStack::"))
+        c = cf_resource.split('::')[1]
+        "StackMate::CloudStack"+c
+      elsif(CS_CLASS_MAP.has_key?(cf_resource))
         CS_CLASS_MAP[cf_resource]
+      else
+        cf_resource
       end
     when 'NOOP'
       if cf_resource == 'Outputs'
