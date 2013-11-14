@@ -48,8 +48,8 @@ begin
           end
         end
         #StackMate::CloudStackFactory.print_class(resource,k,required,optional,a['isasync'],lookup[k],delete_tag,delete_api['isasync'])
-        resource = "VirtualMachineOps" if (resource.eql?("VirtualMachine") && lookup[k].eql?("start"))
-        resource = "VolumeOps" if (resource.eql?("Volume") && lookup[k].eql?("attach"))
+        resource = "VirtualMachineOps" if (resource.eql?("VirtualMachine") && k.eql?("start"))
+        resource = "VolumeOps" if (resource.eql?("Volume") && k.eql?("attach"))
         docs['Resources'].push( {"Name" => resource,
           "CloudStack API Name" => a['name'],
           "Description" => a['description'],

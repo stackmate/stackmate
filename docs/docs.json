@@ -354,10 +354,10 @@
       }
     },
     {
-      "Name": "Volume",
+      "Name": "VolumeOps",
       "CloudStack API Name": "attachVolume",
       "Description": "Attaches a disk volume to a virtual machine.",
-      "StackMate Type": "CloudStack::Volume",
+      "StackMate Type": "CloudStack::VolumeOps",
       "Parameters": {
         "id": {
           "Required": "Yes",
@@ -1592,10 +1592,10 @@
       }
     },
     {
-      "Name": "VirtualMachine",
+      "Name": "VirtualMachineOps",
       "CloudStack API Name": "startVirtualMachine",
       "Description": "Starts a virtual machine.",
-      "StackMate Type": "CloudStack::VirtualMachine",
+      "StackMate Type": "CloudStack::VirtualMachineOps",
       "Parameters": {
         "id": {
           "Required": "Yes",
