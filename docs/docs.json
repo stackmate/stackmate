@@ -1,0 +1,1960 @@
+{
+  "Resources": [
+    {
+      "Name": "Condition",
+      "CloudStack API Name": "createCondition",
+      "Description": "Creates a condition",
+      "StackMate Type": "CloudStack::Condition",
+      "Parameters": {
+        "threshold": {
+          "Required": "Yes",
+          "Type": "long",
+          "Description": "Threshold value."
+        },
+        "relationaloperator": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "Relational Operator to be used with threshold."
+        },
+        "counterid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "ID of the Counter."
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account of the condition. Must be used with the domainId parameter."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID of the account."
+        }
+      }
+    },
+    {
+      "Name": "NicToVirtualMachine",
+      "CloudStack API Name": "addNicToVirtualMachine",
+      "Description": "Adds VM to specified network by creating a NIC",
+      "StackMate Type": "CloudStack::NicToVirtualMachine",
+      "Parameters": {
+        "virtualmachineid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "Virtual Machine ID"
+        },
+        "networkid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "Network ID"
+        },
+        "ipaddress": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "IP Address for the new network"
+        }
+      }
+    },
+    {
+      "Name": "VpnConnection",
+      "CloudStack API Name": "createVpnConnection",
+      "Description": "Create site to site vpn connection",
+      "StackMate Type": "CloudStack::VpnConnection",
+      "Parameters": {
+        "s2scustomergatewayid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "id of the customer gateway"
+        },
+        "s2svpngatewayid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "id of the vpn gateway"
+        }
+      }
+    },
+    {
+      "Name": "SecurityGroupIngress",
+      "CloudStack API Name": "authorizeSecurityGroupIngress",
+      "Description": "Authorizes a particular ingress rule for this security group",
+      "StackMate Type": "CloudStack::SecurityGroupIngress",
+      "Parameters": {
+        "endport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "end port for this ingress rule"
+        },
+        "securitygroupid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The ID of the security group. Mutually exclusive with securityGroupName parameter"
+        },
+        "protocol": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "TCP is default. UDP is the other supported protocol"
+        },
+        "icmpcode": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "error code for this icmp message"
+        },
+        "startport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "start port for this ingress rule"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional project of the security group"
+        },
+        "usersecuritygrouplist": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "user to security group mapping"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list associated"
+        },
+        "securitygroupname": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "The name of the security group. Mutually exclusive with securityGroupName parameter"
+        },
+        "icmptype": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "type of the icmp message being sent"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the security group. Must be used with domainId."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the security group. If the account parameter is used, domainId must also be used."
+        }
+      }
+    },
+    {
+      "Name": "Template",
+      "CloudStack API Name": "createTemplate",
+      "Description": "Creates a template of a virtual machine. The virtual machine must be in a STOPPED state. A template created from this command is automatically designated as a private template visible to the account that created it.",
+      "StackMate Type": "CloudStack::Template",
+      "Parameters": {
+        "displaytext": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the display text of the template. This is usually used for display purposes."
+        },
+        "ostypeid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the OS Type that best represents the OS of this template."
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the name of the template"
+        },
+        "snapshotid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the snapshot the template is being created from. Either this parameter, or volumeId has to be passed in"
+        },
+        "details": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "Template details in key/value pairs."
+        },
+        "virtualmachineid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "Optional, VM ID. If this presents, it is going to create a baremetal template for VM this ID refers to. This is only for VM whose hypervisor type is BareMetal"
+        },
+        "requireshvm": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "true if the template requres HVM, false otherwise"
+        },
+        "ispublic": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "true if this template is a public template, false otherwise"
+        },
+        "volumeid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the disk volume the template is being created from. Either this parameter, or snapshotId has to be passed in"
+        },
+        "bits": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "32 or 64 bit"
+        },
+        "url": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "Optional, only for baremetal hypervisor. The directory name where template stored on CIFS server"
+        },
+        "templatetag": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the tag for this template."
+        },
+        "isdynamicallyscalable": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "true if template contains XS/VMWare tools inorder to support dynamic scaling of VM cpu/memory"
+        },
+        "passwordenabled": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "true if the template supports the password reset feature; default is false"
+        },
+        "isfeatured": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "true if this template is a featured template, false otherwise"
+        }
+      }
+    },
+    {
+      "Name": "Network",
+      "CloudStack API Name": "createNetwork",
+      "Description": "Creates a network",
+      "StackMate Type": "CloudStack::Network",
+      "Parameters": {
+        "displaytext": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the display text of the network"
+        },
+        "networkofferingid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the network offering id"
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the name of the network"
+        },
+        "zoneid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the Zone ID for the network"
+        },
+        "networkdomain": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "network domain"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional project for the ssh key"
+        },
+        "startip": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the beginning IP address in the network IP range"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "domain ID of the account owning a network"
+        },
+        "displaynetwork": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "an optional field, whether to the display the network to the end user or not."
+        },
+        "startipv6": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the beginning IPv6 address in the IPv6 network range"
+        },
+        "acltype": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "Access control type; supported values are account and domain. In 3.0 all shared networks should have aclType=Domain, and all Isolated networks - Account. Account means that only the account owner can use the network, domain - all accouns in the domain can use the network"
+        },
+        "endip": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the ending IP address in the network IP range. If not specified, will be defaulted to startIP"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "account who will own the network"
+        },
+        "gateway": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the gateway of the network. Required for Shared networks and Isolated networks when it belongs to VPC"
+        },
+        "vlan": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the ID or VID of the network"
+        },
+        "endipv6": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the ending IPv6 address in the IPv6 network range"
+        },
+        "ip6cidr": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the CIDR of IPv6 network, must be at least /64"
+        },
+        "aclid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "Network ACL Id associated for the network"
+        },
+        "isolatedpvlan": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the isolated private vlan for this network"
+        },
+        "ip6gateway": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the gateway of the IPv6 network. Required for Shared networks and Isolated networks when it belongs to VPC"
+        },
+        "netmask": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the netmask of the network. Required for Shared networks and Isolated networks when it belongs to VPC"
+        },
+        "subdomainaccess": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "Defines whether to allow subdomains to use networks dedicated to their parent domain(s). Should be used with aclType=Domain, defaulted to allow.subdomain.network.access global config if not specified"
+        },
+        "vpcid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the VPC network belongs to"
+        },
+        "physicalnetworkid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the Physical Network ID the network belongs to"
+        }
+      }
+    },
+    {
+      "Name": "VolumeOps",
+      "CloudStack API Name": "attachVolume",
+      "Description": "Attaches a disk volume to a virtual machine.",
+      "StackMate Type": "CloudStack::VolumeOps",
+      "Parameters": {
+        "id": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the disk volume"
+        },
+        "virtualmachineid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "    the ID of the virtual machine"
+        },
+        "deviceid": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "the ID of the device to map the volume to within the guest OS. If no deviceId is passed in, the next available deviceId will be chosen. Possible values for a Linux OS are:* 1 - /dev/xvdb* 2 - /dev/xvdc* 4 - /dev/xvde* 5 - /dev/xvdf* 6 - /dev/xvdg* 7 - /dev/xvdh* 8 - /dev/xvdi* 9 - /dev/xvdj"
+        }
+      }
+    },
+    {
+      "Name": "AffinityGroup",
+      "CloudStack API Name": "createAffinityGroup",
+      "Description": "Creates an affinity/anti-affinity group",
+      "StackMate Type": "CloudStack::AffinityGroup",
+      "Parameters": {
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the affinity group"
+        },
+        "type": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "Type of the affinity group from the available affinity/anti-affinity group types"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "domainId of the account owning the affinity group"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an account for the affinity group. Must be used with domainId."
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "optional description of the affinity group"
+        }
+      }
+    },
+    {
+      "Name": "AutoScaleVmProfile",
+      "CloudStack API Name": "createAutoScaleVmProfile",
+      "Description": "Creates a profile that contains information about the virtual machine which will be provisioned automatically by autoscale feature.",
+      "StackMate Type": "CloudStack::AutoScaleVmProfile",
+      "Parameters": {
+        "zoneid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "availability zone for the auto deployed virtual machine"
+        },
+        "serviceofferingid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the service offering of the auto deployed virtual machine"
+        },
+        "templateid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the template of the auto deployed virtual machine"
+        },
+        "otherdeployparams": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "parameters other than zoneId/serviceOfferringId/templateId of the auto deployed virtual machine"
+        },
+        "destroyvmgraceperiod": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the time allowed for existing connections to get closed before a vm is destroyed"
+        },
+        "autoscaleuserid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the user used to launch and destroy the VMs"
+        },
+        "counterparam": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "counterparam list. Example: counterparam[0].name=snmpcommunity&counterparam[0].value=public&counterparam[1].name=snmpport&counterparam[1].value=161"
+        }
+      }
+    },
+    {
+      "Name": "SecurityGroup",
+      "CloudStack API Name": "createSecurityGroup",
+      "Description": "Creates a security group",
+      "StackMate Type": "CloudStack::SecurityGroup",
+      "Parameters": {
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the security group"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the description of the security group"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the security group. If the account parameter is used, domainId must also be used."
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the security group. Must be used with domainId."
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "Create security group for project"
+        }
+      }
+    },
+    {
+      "Name": "SSHKeyPair",
+      "CloudStack API Name": "createSSHKeyPair",
+      "Description": "Create a new keypair and returns the private key",
+      "StackMate Type": "CloudStack::SSHKeyPair",
+      "Parameters": {
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "Name of the keypair"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the ssh key. Must be used with domainId."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the ssh key. If the account parameter is used, domainId must also be used."
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional project for the ssh key"
+        }
+      }
+    },
+    {
+      "Name": "GlobalLoadBalancerRule",
+      "CloudStack API Name": "createGlobalLoadBalancerRule",
+      "Description": "Creates a global load balancer rule",
+      "StackMate Type": "CloudStack::GlobalLoadBalancerRule",
+      "Parameters": {
+        "regionid": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "region where the global load balancer is going to be created."
+        },
+        "gslbservicetype": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "GSLB service type (tcp, udp)"
+        },
+        "gslbdomainname": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "domain name for the GSLB service."
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the load balancer rule"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account associated with the global load balancer. Must be used with the domainId parameter."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID associated with the load balancer"
+        },
+        "gslbstickysessionmethodname": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "session sticky method (sourceip) if not specified defaults to sourceip"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the description of the load balancer rule"
+        },
+        "gslblbmethod": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "load balancer algorithm (roundrobin, leastconn, proximity) that method is used to distribute traffic across the zones participating in global server load balancing, if not specified defaults to 'round robin'"
+        }
+      }
+    },
+    {
+      "Name": "StaticRoute",
+      "CloudStack API Name": "createStaticRoute",
+      "Description": "Creates a static route",
+      "StackMate Type": "CloudStack::StaticRoute",
+      "Parameters": {
+        "gatewayid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the gateway id we are creating static route for"
+        },
+        "cidr": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "static route cidr"
+        }
+      }
+    },
+    {
+      "Name": "VMSnapshot",
+      "CloudStack API Name": "createVMSnapshot",
+      "Description": "Creates snapshot for a vm.",
+      "StackMate Type": "CloudStack::VMSnapshot",
+      "Parameters": {
+        "virtualmachineid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "The ID of the vm"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "The discription of the snapshot"
+        },
+        "snapshotmemory": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "snapshot memory if true"
+        },
+        "name": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "The display name of the snapshot"
+        }
+      }
+    },
+    {
+      "Name": "StaticNat",
+      "CloudStack API Name": "enableStaticNat",
+      "Description": "Enables static nat for given ip address",
+      "StackMate Type": "CloudStack::StaticNat",
+      "Parameters": {
+        "ipaddressid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the public IP address id for which static nat feature is being enabled"
+        },
+        "virtualmachineid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the virtual machine for enabling static nat feature"
+        },
+        "networkid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The network of the vm the static nat will be enabled for. Required when public Ip address is not associated with any Guest network yet (VPC case)"
+        },
+        "vmguestip": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "VM guest nic Secondary ip address for the port forwarding rule"
+        }
+      }
+    },
+    {
+      "Name": "IpForwardingRule",
+      "CloudStack API Name": "createIpForwardingRule",
+      "Description": "Creates an ip forwarding rule",
+      "StackMate Type": "CloudStack::IpForwardingRule",
+      "Parameters": {
+        "ipaddressid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the public IP address id of the forwarding rule, already associated via associateIp"
+        },
+        "protocol": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the protocol for the rule. Valid values are TCP or UDP."
+        },
+        "startport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the start port for the rule"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list to forward traffic from"
+        },
+        "endport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the end port for the rule"
+        },
+        "openfirewall": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "if true, firewall rule for source/end pubic port is automatically created; if false - firewall rule has to be created explicitely. Has value true by default"
+        }
+      }
+    },
+    {
+      "Name": "LoadBalancer",
+      "CloudStack API Name": "createLoadBalancer",
+      "Description": "Creates a Load Balancer",
+      "StackMate Type": "CloudStack::LoadBalancer",
+      "Parameters": {
+        "sourceport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the source port the network traffic will be load balanced from"
+        },
+        "scheme": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the load balancer scheme. Supported value in this release is Internal"
+        },
+        "algorithm": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "load balancer algorithm (source, roundrobin, leastconn)"
+        },
+        "networkid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "The guest network the Load Balancer will be created for"
+        },
+        "sourceipaddressnetworkid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the network id of the source ip address"
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the Load Balancer"
+        },
+        "instanceport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the TCP port of the virtual machine where the network traffic will be load balanced to"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the description of the Load Balancer"
+        },
+        "sourceipaddress": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the source ip address the network traffic will be load balanced from"
+        }
+      }
+    },
+    {
+      "Name": "VirtualMachine",
+      "CloudStack API Name": "deployVirtualMachine",
+      "Description": "Creates and automatically starts a virtual machine based on a service offering, disk offering, and template.",
+      "StackMate Type": "CloudStack::VirtualMachine",
+      "Parameters": {
+        "templateid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the template for the virtual machine"
+        },
+        "serviceofferingid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the service offering for the virtual machine"
+        },
+        "zoneid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "availability zone for the virtual machine"
+        },
+        "securitygroupnames": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "comma separated list of security groups names that going to be applied to the virtual machine. Should be passed only when vm is created from a zone with Basic Network support. Mutually exclusive with securitygroupids parameter"
+        },
+        "affinitygroupids": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "comma separated list of affinity groups id that are going to be applied to the virtual machine. Mutually exclusive with affinitygroupnames parameter"
+        },
+        "startvm": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "true if network offering supports specifying ip ranges; defaulted to true if not specified"
+        },
+        "displayvm": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "an optional field, whether to the display the vm to the end user or not."
+        },
+        "diskofferingid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the disk offering for the virtual machine. If the template is of ISO format, the diskOfferingId is for the root disk volume. Otherwise this parameter is used to indicate the offering for the data disk volume. If the templateId parameter passed is from a Template object, the diskOfferingId refers to a DATA Disk Volume created. If the templateId parameter passed is from an ISO object, the diskOfferingId refers to a ROOT Disk Volume created."
+        },
+        "hypervisor": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the hypervisor on which to deploy the virtual machine"
+        },
+        "keyboard": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional keyboard device type for the virtual machine. valid value can be one of de,de-ch,es,fi,fr,fr-be,fr-ch,is,it,jp,nl-be,no,pt,uk,us"
+        },
+        "name": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "host name for the virtual machine"
+        },
+        "iptonetworklist": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "ip to network mapping. Can't be specified with networkIds parameter. Example: iptonetworklist[0].ip=10.10.10.11&iptonetworklist[0].ipv6=fc00:1234:5678::abcd&iptonetworklist[0].networkid=uuid - requests to use ip 10.10.10.11 in network id=uuid"
+        },
+        "networkids": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "list of network ids used by virtual machine. Can't be specified with ipToNetworkList parameter"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the virtual machine. Must be used with domainId."
+        },
+        "userdata": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional binary data that can be sent to the virtual machine upon a successful deployment. This binary data must be base64 encoded before adding it to the request. Using HTTP GET (via querystring), you can send up to 2KB of data after base64 encoding. Using HTTP POST(via POST body), you can send up to 32K of data after base64 encoding."
+        },
+        "keypair": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "name of the ssh key pair used to login to the virtual machine"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "Deploy vm for the project"
+        },
+        "ipaddress": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the ip address for default vm's network"
+        },
+        "displayname": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional user generated name for the virtual machine"
+        },
+        "ip6address": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the ipv6 address for default vm's network"
+        },
+        "affinitygroupnames": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "comma separated list of affinity groups names that are going to be applied to the virtual machine.Mutually exclusive with affinitygroupids parameter"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the virtual machine. If the account parameter is used, domainId must also be used."
+        },
+        "size": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "the arbitrary size for the DATADISK volume. Mutually exclusive with diskOfferingId"
+        },
+        "hostid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "destination Host ID to deploy the VM to - parameter available for root admin only"
+        },
+        "securitygroupids": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "comma separated list of security groups id that going to be applied to the virtual machine. Should be passed only when vm is created from a zone with Basic Network support. Mutually exclusive with securitygroupnames parameter"
+        },
+        "group": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional group for the virtual machine"
+        }
+      }
+    },
+    {
+      "Name": "NetworkACLList",
+      "CloudStack API Name": "createNetworkACLList",
+      "Description": "Creates a Network ACL for the given VPC",
+      "StackMate Type": "CloudStack::NetworkACLList",
+      "Parameters": {
+        "vpcid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "Id of the VPC associated with this network ACL List"
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "Name of the network ACL List"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "Description of the network ACL List"
+        }
+      }
+    },
+    {
+      "Name": "PortForwardingRule",
+      "CloudStack API Name": "createPortForwardingRule",
+      "Description": "Creates a port forwarding rule",
+      "StackMate Type": "CloudStack::PortForwardingRule",
+      "Parameters": {
+        "privateport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the starting port of port forwarding rule's private port range"
+        },
+        "protocol": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the protocol for the port fowarding rule. Valid values are TCP or UDP."
+        },
+        "ipaddressid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the IP address id of the port forwarding rule"
+        },
+        "virtualmachineid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the virtual machine for the port forwarding rule"
+        },
+        "publicport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the starting port of port forwarding rule's public port range"
+        },
+        "privateendport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the ending port of port forwarding rule's private port range"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list to forward traffic from"
+        },
+        "vmguestip": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "VM guest nic Secondary ip address for the port forwarding rule"
+        },
+        "networkid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The network of the vm the Port Forwarding rule will be created for. Required when public Ip address is not associated with any Guest network yet (VPC case)"
+        },
+        "publicendport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the ending port of port forwarding rule's private port range"
+        },
+        "openfirewall": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "if true, firewall rule for source/end pubic port is automatically created; if false - firewall rule has to be created explicitely. If not specified 1) defaulted to false when PF rule is being created for VPC guest network 2) in all other cases defaulted to true"
+        }
+      }
+    },
+    {
+      "Name": "EgressFirewallRule",
+      "CloudStack API Name": "createEgressFirewallRule",
+      "Description": "Creates a egress firewall rule for a given network ",
+      "StackMate Type": "CloudStack::EgressFirewallRule",
+      "Parameters": {
+        "networkid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the network id of the port forwarding rule"
+        },
+        "protocol": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the protocol for the firewall rule. Valid values are TCP/UDP/ICMP."
+        },
+        "icmpcode": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "error code for this icmp message"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list to forward traffic from"
+        },
+        "type": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "type of firewallrule: system/user"
+        },
+        "endport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the ending port of firewall rule"
+        },
+        "icmptype": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "type of the icmp message being sent"
+        },
+        "startport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the starting port of firewall rule"
+        }
+      }
+    },
+    {
+      "Name": "ToGlobalLoadBalancerRule",
+      "CloudStack API Name": "assignToGlobalLoadBalancerRule",
+      "Description": "Assign load balancer rule or list of load balancer rules to a global load balancer rules.",
+      "StackMate Type": "CloudStack::ToGlobalLoadBalancerRule",
+      "Parameters": {
+        "id": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the global load balancer rule"
+        },
+        "loadbalancerrulelist": {
+          "Required": "Yes",
+          "Type": "list",
+          "Description": "the list load balancer rules that will be assigned to gloabal load balacner rule"
+        },
+        "gslblbruleweightsmap": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "Map of LB rule id's and corresponding weights (between 1-100) in the GSLB rule, if not specified weight of a LB rule is defaulted to 1. Specified as 'gslblbruleweightsmap[0].loadbalancerid=UUID&gslblbruleweightsmap[0].weight=10'"
+        }
+      }
+    },
+    {
+      "Name": "InstanceGroup",
+      "CloudStack API Name": "createInstanceGroup",
+      "Description": "Creates a vm group",
+      "StackMate Type": "CloudStack::InstanceGroup",
+      "Parameters": {
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the name of the instance group"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account of the instance group. The account parameter must be used with the domainId parameter."
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The project of the instance group"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID of account owning the instance group"
+        }
+      }
+    },
+    {
+      "Name": "IpToNic",
+      "CloudStack API Name": "addIpToNic",
+      "Description": "Assigns secondary IP to NIC",
+      "StackMate Type": "CloudStack::IpToNic",
+      "Parameters": {
+        "nicid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the nic to which you want to assign private IP"
+        },
+        "ipaddress": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "Secondary IP Address"
+        }
+      }
+    },
+    {
+      "Name": "AutoScaleVmGroup",
+      "CloudStack API Name": "createAutoScaleVmGroup",
+      "Description": "Creates and automatically starts a virtual machine based on a service offering, disk offering, and template.",
+      "StackMate Type": "CloudStack::AutoScaleVmGroup",
+      "Parameters": {
+        "maxmembers": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the maximum number of members in the vmgroup, The number of instances in the vm group will be equal to or less than this number."
+        },
+        "minmembers": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the minimum number of members in the vmgroup, the number of instances in the vm group will be equal to or more than this number."
+        },
+        "scaledownpolicyids": {
+          "Required": "Yes",
+          "Type": "list",
+          "Description": "list of scaledown autoscale policies"
+        },
+        "lbruleid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the load balancer rule"
+        },
+        "scaleuppolicyids": {
+          "Required": "Yes",
+          "Type": "list",
+          "Description": "list of scaleup autoscale policies"
+        },
+        "vmprofileid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the autoscale profile that contains information about the vms in the vm group."
+        },
+        "interval": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the frequency at which the conditions have to be evaluated"
+        }
+      }
+    },
+    {
+      "Name": "LBHealthCheckPolicy",
+      "CloudStack API Name": "createLBHealthCheckPolicy",
+      "Description": "Creates a Load Balancer healthcheck policy ",
+      "StackMate Type": "CloudStack::LBHealthCheckPolicy",
+      "Parameters": {
+        "lbruleid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the load balancer rule"
+        },
+        "responsetimeout": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "Time to wait when receiving a response from the health check (2sec - 60 sec)"
+        },
+        "unhealthythreshold": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "Number of consecutive health check failures before declaring an instance unhealthy"
+        },
+        "pingpath": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "HTTP Ping Path"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the description of the load balancer HealthCheck policy"
+        },
+        "intervaltime": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "Amount of time between health checks (1 sec - 20940 sec)"
+        },
+        "healthythreshold": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "Number of consecutive health check success before declaring an instance healthy"
+        }
+      }
+    },
+    {
+      "Name": "VpnCustomerGateway",
+      "CloudStack API Name": "createVpnCustomerGateway",
+      "Description": "Creates site to site vpn customer gateway",
+      "StackMate Type": "CloudStack::VpnCustomerGateway",
+      "Parameters": {
+        "esppolicy": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "ESP policy of the customer gateway"
+        },
+        "ikepolicy": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "IKE policy of the customer gateway"
+        },
+        "ipsecpsk": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "IPsec Preshared-Key of the customer gateway"
+        },
+        "cidrlist": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "guest cidr list of the customer gateway"
+        },
+        "gateway": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "public ip address id of the customer gateway"
+        },
+        "esplifetime": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "Lifetime of phase 2 VPN connection to the customer gateway, in seconds"
+        },
+        "dpd": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "If DPD is enabled for VPN connection"
+        },
+        "name": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "name of this customer gateway"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID associated with the gateway. If used with the account parameter returns the gateway associated with the account for the specified domain."
+        },
+        "ikelifetime": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "Lifetime of phase 1 VPN connection to the customer gateway, in seconds"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account associated with the gateway. Must be used with the domainId parameter."
+        }
+      }
+    },
+    {
+      "Name": "VpnGateway",
+      "CloudStack API Name": "createVpnGateway",
+      "Description": "Creates site to site vpn local gateway",
+      "StackMate Type": "CloudStack::VpnGateway",
+      "Parameters": {
+        "vpcid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "public ip address id of the vpn gateway"
+        }
+      }
+    },
+    {
+      "Name": "SecurityGroupEgress",
+      "CloudStack API Name": "authorizeSecurityGroupEgress",
+      "Description": "Authorizes a particular egress rule for this security group",
+      "StackMate Type": "CloudStack::SecurityGroupEgress",
+      "Parameters": {
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list associated"
+        },
+        "securitygroupname": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "The name of the security group. Mutually exclusive with securityGroupName parameter"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the security group. Must be used with domainId."
+        },
+        "endport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "end port for this egress rule"
+        },
+        "usersecuritygrouplist": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "user to security group mapping"
+        },
+        "protocol": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "TCP is default. UDP is the other supported protocol"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the security group. If the account parameter is used, domainId must also be used."
+        },
+        "icmptype": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "type of the icmp message being sent"
+        },
+        "startport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "start port for this egress rule"
+        },
+        "icmpcode": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "error code for this icmp message"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional project of the security group"
+        },
+        "securitygroupid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The ID of the security group. Mutually exclusive with securityGroupName parameter"
+        }
+      }
+    },
+    {
+      "Name": "Iso",
+      "CloudStack API Name": "attachIso",
+      "Description": "Attaches an ISO to a virtual machine.",
+      "StackMate Type": "CloudStack::Iso",
+      "Parameters": {
+        "id": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the ISO file"
+        },
+        "virtualmachineid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the virtual machine"
+        }
+      }
+    },
+    {
+      "Name": "Tags",
+      "CloudStack API Name": "createTags",
+      "Description": "Creates resource tag(s)",
+      "StackMate Type": "CloudStack::Tags",
+      "Parameters": {
+        "resourceids": {
+          "Required": "Yes",
+          "Type": "list",
+          "Description": "list of resources to create the tags for"
+        },
+        "tags": {
+          "Required": "Yes",
+          "Type": "map",
+          "Description": "Map of tags (key/value pairs)"
+        },
+        "resourcetype": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "type of the resource"
+        },
+        "customer": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "identifies client specific tag. When the value is not null, the tag can't be used by cloudStack code internally"
+        }
+      }
+    },
+    {
+      "Name": "AutoScaleVmGroup",
+      "CloudStack API Name": "enableAutoScaleVmGroup",
+      "Description": "Enables an AutoScale Vm Group",
+      "StackMate Type": "CloudStack::AutoScaleVmGroup",
+      "Parameters": {
+        "id": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the autoscale group"
+        }
+      }
+    },
+    {
+      "Name": "SnapshotPolicy",
+      "CloudStack API Name": "createSnapshotPolicy",
+      "Description": "Creates a snapshot policy for the account.",
+      "StackMate Type": "CloudStack::SnapshotPolicy",
+      "Parameters": {
+        "volumeid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the disk volume"
+        },
+        "maxsnaps": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "maximum number of snapshots to retain"
+        },
+        "schedule": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "time the snapshot is scheduled to be taken. Format is:* if HOURLY, MM* if DAILY, MM:HH* if WEEKLY, MM:HH:DD (1-7)* if MONTHLY, MM:HH:DD (1-28)"
+        },
+        "intervaltype": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "valid values are HOURLY, DAILY, WEEKLY, and MONTHLY"
+        },
+        "timezone": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "Specifies a timezone for this command. For more information on the timezone parameter, see Time Zone Format."
+        }
+      }
+    },
+    {
+      "Name": "NetworkACL",
+      "CloudStack API Name": "createNetworkACL",
+      "Description": "Creates a ACL rule in the given network (the network has to belong to VPC)",
+      "StackMate Type": "CloudStack::NetworkACL",
+      "Parameters": {
+        "protocol": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the protocol for the ACL rule. Valid values are TCP/UDP/ICMP/ALL or valid protocol number"
+        },
+        "networkid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The network of the vm the ACL will be created for"
+        },
+        "endport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the ending port of ACL"
+        },
+        "action": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "scl entry action, allow or deny"
+        },
+        "startport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the starting port of ACL"
+        },
+        "traffictype": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the traffic type for the ACL,can be Ingress or Egress, defaulted to Ingress if not specified"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list to allow traffic from/to"
+        },
+        "icmpcode": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "error code for this icmp message"
+        },
+        "aclid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The network of the vm the ACL will be created for"
+        },
+        "number": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "The network of the vm the ACL will be created for"
+        },
+        "icmptype": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "type of the icmp message being sent"
+        }
+      }
+    },
+    {
+      "Name": "VPC",
+      "CloudStack API Name": "createVPC",
+      "Description": "Creates a VPC",
+      "StackMate Type": "CloudStack::VPC",
+      "Parameters": {
+        "cidr": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the cidr of the VPC. All VPC guest networks' cidrs should be within this CIDR"
+        },
+        "zoneid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the availability zone"
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the name of the VPC"
+        },
+        "vpcofferingid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the VPC offering"
+        },
+        "displaytext": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the display text of the VPC"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "create VPC for the project"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account associated with the VPC. Must be used with the domainId parameter."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID associated with the VPC. If used with the account parameter returns the VPC associated with the account for the specified domain."
+        },
+        "networkdomain": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "VPC network domain. All networks inside the VPC will belong to this domain"
+        }
+      }
+    },
+    {
+      "Name": "Volume",
+      "CloudStack API Name": "createVolume",
+      "Description": "Creates a disk volume from a disk offering. This disk volume must still be attached to a virtual machine to make use of it.",
+      "StackMate Type": "CloudStack::Volume",
+      "Parameters": {
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the name of the disk volume"
+        },
+        "maxiops": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "max iops"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID associated with the disk offering. If used with the account parameter returns the disk volume associated with the account for the specified domain."
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the project associated with the volume. Mutually exclusive with account parameter"
+        },
+        "displayvolume": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "an optional field, whether to display the volume to the end user or not."
+        },
+        "snapshotid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the snapshot ID for the disk volume. Either diskOfferingId or snapshotId must be passed in."
+        },
+        "miniops": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "min iops"
+        },
+        "diskofferingid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the disk offering. Either diskOfferingId or snapshotId must be passed in."
+        },
+        "size": {
+          "Required": "No",
+          "Type": "long",
+          "Description": "Arbitrary volume size"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account associated with the disk volume. Must be used with the domainId parameter."
+        },
+        "zoneid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the availability zone"
+        }
+      }
+    },
+    {
+      "Name": "ToLoadBalancerRule",
+      "CloudStack API Name": "assignToLoadBalancerRule",
+      "Description": "Assigns virtual machine or a list of virtual machines to a load balancer rule.",
+      "StackMate Type": "CloudStack::ToLoadBalancerRule",
+      "Parameters": {
+        "id": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the load balancer rule"
+        },
+        "virtualmachineids": {
+          "Required": "Yes",
+          "Type": "list",
+          "Description": "the list of IDs of the virtual machine that are being assigned to the load balancer rule(i.e. virtualMachineIds=1,2,3)"
+        }
+      }
+    },
+    {
+      "Name": "VirtualMachineOps",
+      "CloudStack API Name": "startVirtualMachine",
+      "Description": "Starts a virtual machine.",
+      "StackMate Type": "CloudStack::VirtualMachineOps",
+      "Parameters": {
+        "id": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "The ID of the virtual machine"
+        },
+        "hostid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "destination Host ID to deploy the VM to - parameter available for root admin only"
+        }
+      }
+    },
+    {
+      "Name": "RemoteAccessVpn",
+      "CloudStack API Name": "createRemoteAccessVpn",
+      "Description": "Creates a l2tp/ipsec remote access vpn",
+      "StackMate Type": "CloudStack::RemoteAccessVpn",
+      "Parameters": {
+        "publicipid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "public ip address id of the vpn server"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the VPN. Must be used with domainId."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the VPN. If the account parameter is used, domainId must also be used."
+        },
+        "openfirewall": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "if true, firewall rule for source/end pubic port is automatically created; if false - firewall rule has to be created explicitely. Has value true by default"
+        },
+        "iprange": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the range of ip addresses to allocate to vpn clients. The first ip in the range will be taken by the vpn server"
+        }
+      }
+    },
+    {
+      "Name": "IpAddress",
+      "CloudStack API Name": "associateIpAddress",
+      "Description": "Acquires and associates a public IP to an account.",
+      "StackMate Type": "CloudStack::IpAddress",
+      "Parameters": {
+        "networkid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The network this ip address should be associated to."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the domain to associate with this IP address"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account to associate with this IP address"
+        },
+        "vpcid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the VPC you want the ip address to be associated with"
+        },
+        "regionid": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "region ID from where portable ip is to be associated."
+        },
+        "zoneid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the ID of the availability zone you want to acquire an public IP address from"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "Deploy vm for the project"
+        },
+        "isportable": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "should be set to true if public IP is required to be transferable across zones, if not specified defaults to false"
+        }
+      }
+    },
+    {
+      "Name": "VpnUser",
+      "CloudStack API Name": "addVpnUser",
+      "Description": "Adds vpn users",
+      "StackMate Type": "CloudStack::VpnUser",
+      "Parameters": {
+        "password": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "password for the username"
+        },
+        "username": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "username for the vpn user"
+        },
+        "projectid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "add vpn user to the specific project"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "an optional account for the vpn user. Must be used with domainId."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "an optional domainId for the vpn user. If the account parameter is used, domainId must also be used."
+        }
+      }
+    },
+    {
+      "Name": "Project",
+      "CloudStack API Name": "createProject",
+      "Description": "Creates a project",
+      "StackMate Type": "CloudStack::Project",
+      "Parameters": {
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the project"
+        },
+        "displaytext": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "display text of the project"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "account who will be Admin for the project"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "domain ID of the account owning a project"
+        }
+      }
+    },
+    {
+      "Name": "LoadBalancerRule",
+      "CloudStack API Name": "createLoadBalancerRule",
+      "Description": "Creates a load balancer rule",
+      "StackMate Type": "CloudStack::LoadBalancerRule",
+      "Parameters": {
+        "publicport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the public port from where the network traffic will be load balanced from"
+        },
+        "privateport": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the private port of the private ip address/virtual machine where the network traffic will be load balanced to"
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the load balancer rule"
+        },
+        "algorithm": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "load balancer algorithm (source, roundrobin, leastconn)"
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the description of the load balancer rule"
+        },
+        "networkid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The guest network this rule will be created for. Required when public Ip address is not associated with any Guest network yet (VPC case)"
+        },
+        "openfirewall": {
+          "Required": "No",
+          "Type": "boolean",
+          "Description": "if true, firewall rule for source/end pubic port is automatically created; if false - firewall rule has to be created explicitely. If not specified 1) defaulted to false when LB rule is being created for VPC guest network 2) in all other cases defaulted to true"
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the account associated with the load balancer. Must be used with the domainId parameter."
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "the domain ID associated with the load balancer"
+        },
+        "publicipid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "public ip address id from where the network traffic will be load balanced from"
+        },
+        "zoneid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "zone where the load balancer is going to be created. This parameter is required when LB service provider is ElasticLoadBalancerVm"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list to forward traffic from"
+        }
+      }
+    },
+    {
+      "Name": "AutoScalePolicy",
+      "CloudStack API Name": "createAutoScalePolicy",
+      "Description": "Creates an autoscale policy for a provision or deprovision action, the action is taken when the all the conditions evaluates to true for the specified duration. The policy is in effect once it is attached to a autscale vm group.",
+      "StackMate Type": "CloudStack::AutoScalePolicy",
+      "Parameters": {
+        "action": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the action to be executed if all the conditions evaluate to true for the specified duration."
+        },
+        "duration": {
+          "Required": "Yes",
+          "Type": "integer",
+          "Description": "the duration for which the conditions have to be true before action is taken"
+        },
+        "conditionids": {
+          "Required": "Yes",
+          "Type": "list",
+          "Description": "the list of IDs of the conditions that are being evaluated on every interval"
+        },
+        "quiettime": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the cool down period for which the policy should not be evaluated after the action has been taken"
+        }
+      }
+    },
+    {
+      "Name": "LBStickinessPolicy",
+      "CloudStack API Name": "createLBStickinessPolicy",
+      "Description": "Creates a Load Balancer stickiness policy ",
+      "StackMate Type": "CloudStack::LBStickinessPolicy",
+      "Parameters": {
+        "methodname": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the LB Stickiness policy method, possible values can be obtained from ListNetworks API "
+        },
+        "lbruleid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the ID of the load balancer rule"
+        },
+        "name": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "name of the LB Stickiness policy"
+        },
+        "param": {
+          "Required": "No",
+          "Type": "map",
+          "Description": "param list. Example: param[0].name=cookiename&param[0].value=LBCookie "
+        },
+        "description": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "the description of the LB Stickiness policy"
+        }
+      }
+    },
+    {
+      "Name": "Snapshot",
+      "CloudStack API Name": "createSnapshot",
+      "Description": "Creates an instant snapshot of a volume.",
+      "StackMate Type": "CloudStack::Snapshot",
+      "Parameters": {
+        "volumeid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "The ID of the disk volume"
+        },
+        "domainid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "The domain ID of the snapshot. If used with the account parameter, specifies a domain for the account associated with the disk volume."
+        },
+        "account": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "The account of the snapshot. The account parameter must be used with the domainId parameter."
+        },
+        "policyid": {
+          "Required": "No",
+          "Type": "uuid",
+          "Description": "policy id of the snapshot, if this is null, then use MANUAL_POLICY."
+        }
+      }
+    },
+    {
+      "Name": "FirewallRule",
+      "CloudStack API Name": "createFirewallRule",
+      "Description": "Creates a firewall rule for a given ip address",
+      "StackMate Type": "CloudStack::FirewallRule",
+      "Parameters": {
+        "protocol": {
+          "Required": "Yes",
+          "Type": "string",
+          "Description": "the protocol for the firewall rule. Valid values are TCP/UDP/ICMP."
+        },
+        "ipaddressid": {
+          "Required": "Yes",
+          "Type": "uuid",
+          "Description": "the IP address id of the port forwarding rule"
+        },
+        "startport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the starting port of firewall rule"
+        },
+        "cidrlist": {
+          "Required": "No",
+          "Type": "list",
+          "Description": "the cidr list to forward traffic from"
+        },
+        "icmpcode": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "error code for this icmp message"
+        },
+        "type": {
+          "Required": "No",
+          "Type": "string",
+          "Description": "type of firewallrule: system/user"
+        },
+        "icmptype": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "type of the icmp message being sent"
+        },
+        "endport": {
+          "Required": "No",
+          "Type": "integer",
+          "Description": "the ending port of firewall rule"
+        }
+      }
+    }
+  ]
+}
