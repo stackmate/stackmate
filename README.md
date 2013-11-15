@@ -1,8 +1,8 @@
-
 # Stackmate - CloudFormation for CloudStack
 
-A library designed to read existing CloudFormation templates 
+A library designed to read CloudFormation templates 
 and execute them on a CloudStack deployment. 
+Supports  AWS Cloudformation templates (namespace AWS::Cloudformation) as well as the CloudStack:: native namespace.
 Uses the [ruote](http://ruote.rubyforge.org) workflow engine,
 and embeds a modular [Sinatra](http://www.sinatrarb.com/) application for wait handles.
 
@@ -11,7 +11,8 @@ Instead it runs everything on the client side.
 
 [Stacktician](https://github.com/chiradeep/stacktician) embeds stackmate to run it as a web application.
 
-Note that only Basic Zone (aka EC2-Classic) is supported for now.
+For the AWS::CloudFormation namespace, only Basic Zone (aka EC2-Classic) is supported for now.
+For the CloudStack:: namespace, all virtual resources that can be created in CloudStack 4.2 are supported.
 
 Follow:
 * \#cloudstack-dev on Freenode
@@ -59,7 +60,9 @@ $ export SECKEY=9iSsuImdUxU0oumHu0p11li4IoUtwcvrSHcU63ZHS_y-4Iz3w5xPROzyjZTUXkhI
 $ export URL="http://localhost:8080/client/api"
 ```
 
-* The supplied templates are taken from the AWS samples. 
+## Sample Templates
+### AWS samples
+AWS samples are templates that use the AWS::CloudFormation namespace.
 
 You need a couple of mappings from AWS ids to your CloudStack implementation:
 
@@ -73,6 +76,11 @@ templates:
 zoneid: b3409835-02b0-4d21-bba4-1f659402117e
 ```
 
+### CloudStack Samples
+CloudStack samples use the CloudStack namespace. These templates typically require the zone id, service offering id and template id as input parameters
+
+
+## Usage Example
 * Ensure you have a ssh keypair called 'Foo' (used in the template parameter below) for your account FIRST:
 
 ```bash
@@ -83,7 +91,7 @@ $ cloudmonkey
 ```
 
 
-* Create a LAMP stack:
+* Create a LAMP stack (AWS template)
 
 ```bash
 bin/stackmate MYSTACK01   --template-file=templates/LAMP_Single_Instance.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=75.75.75.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=Foo"
@@ -102,7 +110,9 @@ If you don't want the wait condition server to run, just use '-n'. Stackmate wil
 
 If you want to validate your template, you can use the --dry-run option. This will parse and validate the template and create an execution schedule.
 
-StackMate allows you to define your own participants that will be called based on the template namespace. For example, you can define a class Foo::Bar
+## Extending StackMate to other APIs
+
+StackMate allows you to define your own workflow participants that will be called based on the template namespace. For example, you can define a class Foo::Bar
 and use Foo::Bar as a "Type" in the template. The requirement is :
 (1) It should contain a class variable @@stackmate_participant set to true so as to register with StackMate
 (2) Foo::Bar should have Ruote::Participant as its ancestor
@@ -113,10 +123,9 @@ Use --plugins <Directories with ruby files> to add plugins. This has undergone l
 
 ## TODO
 * Parallelize (with ruote concurrence) where possible
-* rollback on error
 * timeouts
 * embed in a web app ( [Stacktician](https://github.com/chiradeep/stacktician) )
-* add support for Advanced Zone templates (VPC), LB, etc
+
 
 ## Feedback & bug reports
 
@@ -151,7 +160,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 - ruote, <http://ruote.rubyforge.org/>
 - sinatra, <http://www.sinatrarb.com/>
-- cloudstack_ruby_client, <https://github.com/chipchilders/cloudstack_ruby_client>
 
 Many thanks to the authors 
 
