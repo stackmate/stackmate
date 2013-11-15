@@ -304,7 +304,7 @@ module StackMate
         v = val['Value']
         constructed_value = intrinsic(v, workitem)
         val['Value'] = constructed_value
-        workitem['Outputs'][key] = constructed_value
+        #workitem['Outputs'][key] = constructed_value
         logger.debug "Output: key = #{key}, value = #{constructed_value} descr = #{val['Description']}"
       end
 
