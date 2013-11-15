@@ -19,15 +19,12 @@ Gem::Specification.new do |s|
     'https://github.com/chiradeep/stackmate'
   s.platform = Gem::Platform::RUBY
 
-  #s.add_runtime_dependency 'ruby_parser', '~> 2.3'
-  s.add_runtime_dependency 'cloudstack_ruby_client', '= 0.0.4'
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'ruote', '>= 2.3.0'
   s.add_runtime_dependency 'sinatra', '~> 1.3.6'
   s.add_runtime_dependency 'yajl-ruby', '= 1.1.0'
   s.add_runtime_dependency 'netaddr'
 
-  #s.add_development_dependency 'json'
   s.add_development_dependency 'rspec'
   s.require_path = 'lib'
 end
