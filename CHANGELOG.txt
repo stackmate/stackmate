@@ -1,0 +1,12 @@
+
+= stackmate - CHANGELOG.txt
+
+
+== stackmate - 0.1.0    
+
+- replace cloudstack_ruby_client with a simple built-in client
+- support for CloudStack:: namespace in json template.
+- tests
+- rake tasks to simplify generation of code for CS virtual resources and template docs
+- extensibility support by adding your own plugin classes to interface with other services
+
