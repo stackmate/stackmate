@@ -36,7 +36,7 @@ opt_parser = OptionParser.new do |opts|
     options[:plugins] = plugins
   end
   options[:timeout] = "600"
-  opts.on("--timeout SECONDS",String, "Timeout for stack creation in seconds, defaults to 300 seconds") do |t|
+  opts.on("--timeout SECONDS",String, "Timeout for stack creation in seconds, defaults to 600 seconds") do |t|
     options[:timeout] = t
   end
   opts.on("-d", "--debug", "Debug level logging") do
