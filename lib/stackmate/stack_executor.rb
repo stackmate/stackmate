@@ -17,12 +17,13 @@ module StackMate
   class StackExecutor < StackMate::Stacker
     include Logging
 
-    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts, plugins=nil)
+    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts, timeout, plugins=nil)
       stackstr = File.read(templatefile)
       super(stackstr, stackname, resolve_param_refs(params, stackname))
       @engine = engine
       @create_wait_conditions = create_wait_conditions
       @api_opts = api_opts
+      @timeout = timeout
       load_plugins(plugins)
     end
 
@@ -82,6 +83,8 @@ module StackMate
       resolved_params['AWS::Region'] = 'us-east-1' #TODO handle this better
       resolved_params['AWS::StackName'] = stackname
       resolved_params['AWS::StackId'] = stackname
+      resolved_params['CloudStack::StackName'] = stackname
+      resolved_params['CloudStack::StackId'] = stackname
       resolved_params
     end
 
@@ -104,14 +107,16 @@ module StackMate
         throw :unknown, t if !StackMate.class_for(t)
         @engine.register_participant p, StackMate.class_for(t), @api_opts
       end
-
+      timeout = @timeout + "s"
       @engine.register_participant 'Output', StackMate.class_for('Outputs')
+      @engine.register_participant 'Notify', StackMate.class_for('StackMate::StackNotifier')
       @pdef = Ruote.define @stackname.to_s() do
-        cursor :timeout => '300s', :on_error => 'rollback', :on_timeout => 'rollback' do
+        cursor :timeout => timeout, :on_error => 'rollback', :on_timeout => 'rollback' do
           participants.collect{ |name| __send__(name, :operation => :create) }
           __send__('Output')
         end
-        define 'rollback', :timeout => '300s' do
+        define 'rollback', :timeout => timeout do
+          __send__('Notify')
           participants.reverse_each.collect {|name| __send__(name, :operation => :rollback) }
         end
       end
@@ -119,7 +124,8 @@ module StackMate
 
     def launch
       wfid = @engine.launch( pdef, @templ)
-      @engine.wait_for(wfid, :timeout => 600)
+      timeout = @timeout.to_i * 2
+      @engine.wait_for(wfid, :timeout => timeout)
       logger.error { "engine error : #{@engine.errors.first.message}"} if @engine.errors.first
     end
   end

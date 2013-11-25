@@ -4,6 +4,7 @@ require 'optparse'
 require 'stackmate'
 require 'stackmate/classmap'
 require 'stackmate/waitcondition_server'
+require 'stackmate/logging'
 
 
 options = {}
@@ -33,6 +34,13 @@ opt_parser = OptionParser.new do |opts|
   end
   opts.on("--plugins DIRS",String, "Comman separated plugins directory") do |plugins|
     options[:plugins] = plugins
+  end
+  options[:timeout] = "600"
+  opts.on("--timeout SECONDS",String, "Timeout for stack creation in seconds, defaults to 300 seconds") do |t|
+    options[:timeout] = t
+  end
+  opts.on("-d", "--debug", "Debug level logging") do
+    StackMate.set_log_level("debug")
   end
 end
 
@@ -65,7 +73,7 @@ if options[:file] && stack_name != ''
       StackMate.configure('NOOP') if options[:dry_run]
       opts = {}
       api_opts = {:APIKEY => "#{ENV['APIKEY']}", :SECKEY => "#{ENV['SECKEY']}", :URL => "#{ENV['URL']}" }
-      p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts, options[:plugins])
+      p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts, options[:timeout], options[:plugins])
       p.launch()
       nil
     end
