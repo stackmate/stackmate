@@ -153,6 +153,15 @@ module StackMate
     end
   end
 
+  class StackNotifier < Ruote::Participant
+    include Logging
+
+    def on_workitem
+      logger.error("\n\nINITIATING STACK ROLLBACK\n\n")
+      reply
+    end
+  end
+
   class StackNest < Ruote::Participant
     include Logging
     include Intrinsic

@@ -1,6 +1,20 @@
 require 'logger'
 
 module StackMate
+  @log_lvl = Logger::INFO
+  def StackMate.set_log_level(lvl)
+    case lvl
+    when 'info'
+      @log_lvl = Logger::INFO
+    when 'debug'
+      @log_lvl = Logger::DEBUG
+    end
+  end
+
+  def StackMate.log_level
+    @log_lvl
+  end
+
   module Logging
     def logger
       @logger ||= Logging.logger_for(self.class.name)
@@ -16,6 +30,7 @@ module StackMate
 
       def configure_logger_for(classname)
         logger = Logger.new(STDOUT)
+        logger.level = StackMate.log_level
         logger.progname = classname
         logger.datetime_format= '%F %T'
         logger.formatter = proc do |severity, datetime, progname, msg|
