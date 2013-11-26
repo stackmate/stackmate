@@ -1,6 +1,12 @@
 
 = stackmate - CHANGELOG.txt
 
+== stackmate - 0.1.1    
+- Timeout and notification support
+- Rollback notification.
+- No API changes
+- Added templates in CloudStack:: namespace
+
 
 == stackmate - 0.1.0    
 
@@ -9,4 +15,5 @@
 - tests
 - rake tasks to simplify generation of code for CS virtual resources and template docs
 - extensibility support by adding your own plugin classes to interface with other services
+- added CS sample template
 
