@@ -77,7 +77,7 @@ zoneid: b3409835-02b0-4d21-bba4-1f659402117e
 ```
 
 ### CloudStack Samples
-CloudStack samples use the CloudStack namespace. These templates typically require the zone id, service offering id and template id as input parameters
+CloudStack samples use the CloudStack namespace. These templates typically require the zone id, service offering id and template id as input parameters. These ids are passed directly to the `stackmate` command instead of being set in the `local.yml` file, see usage below.
 
 
 ## Usage Example
@@ -95,6 +95,12 @@ $ cloudmonkey
 
 ```bash
 bin/stackmate MYSTACK01   --template-file=templates/LAMP_Single_Instance.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=75.75.75.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=Foo"
+```
+
+* Create a LAMP stack (CloudStack example)
+
+```bash
+bin/stackmate MYSTACK01 --template-file=templates/CloudStack/LAMP_Single_Instance_CloudStack.template -p "DBName=cloud;DBUserName=cloud;SSHLocation=0.0.0.0/24;DBUsername=cloud;DBPassword=cloud;DBRootPassword=cloud;KeyName=exoscale;zoneid=1128bd56-b4d9-4ac6-a7b9-c715b187ce11;templateid=35a37ccd-5bf6-4c5f-a9a1-1884f99e1fd3;serviceofferingid=b6cd1ff5-3a2f-4e9d-a4d1-8988c1191fe8"
 ```
 
 * If everything is successful, stackmate will hang after deploying the security groups and vms. 
