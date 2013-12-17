@@ -2,7 +2,6 @@ GEM
   remote: https://rubygems.org/
   specs:
     blankslate (2.1.2.4)
-    cloudstack_ruby_client (0.0.4)
     file-tail (1.0.12)
       tins (~> 0.5)
     json (1.8.0)
@@ -56,7 +55,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  cloudstack_ruby_client (= 0.0.4)
   json
   netaddr
   ruote (>= 2.3.0)
