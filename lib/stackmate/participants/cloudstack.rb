@@ -80,7 +80,7 @@ module StackMate
         #resp = @client.send(cmd, args)
         resp = @client.api_call(cmd,args)
         jobid = resp['jobid'] if resp
-        resp = api_poll(jobid, 3, 3) if jobid
+        resp = api_poll(jobid, 60, 5) if jobid
         return resp
       rescue => e
         logger.error("Failed to make request #{cmd} to CloudStack server while creating resource #{@name}")
