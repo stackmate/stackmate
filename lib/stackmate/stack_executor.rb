@@ -17,7 +17,7 @@ module StackMate
   class StackExecutor < StackMate::Stacker
     include Logging
 
-    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts, timeout, plugins=nil)
+    def initialize(templatefile, stackname, params, engine, create_wait_conditions, api_opts, timeout, plugins=nil, no_rollback=false)
       stackstr = File.read(templatefile)
       super(stackstr, stackname, resolve_param_refs(params, stackname))
       @engine = engine
@@ -25,6 +25,7 @@ module StackMate
       @api_opts = api_opts
       @timeout = timeout
       load_plugins(plugins)
+      @rollback = !no_rollback
     end
 
     def load_plugins(plugins)
@@ -116,14 +117,16 @@ module StackMate
           __send__('Output')
         end
         define 'rollback', :timeout => timeout do
-          __send__('Notify')
-          participants.reverse_each.collect {|name| __send__(name, :operation => :rollback) }
+          __send__('Notify', :if => '${v:do_rollback}')
+          participants.reverse_each.collect {|name| __send__(name, :operation => :rollback, :if => '${v:do_rollback}') }
         end
       end
     end
 
     def launch
-      wfid = @engine.launch( pdef, @templ)
+      p @rollback
+      wfid = @engine.launch(pdef, @templ, {'do_rollback' => @rollback})
+      #wfid = @engine.launch(pdef, @templ)
       timeout = @timeout.to_i * 2
       @engine.wait_for(wfid, :timeout => timeout)
       logger.error { "engine error : #{@engine.errors.first.message}"} if @engine.errors.first

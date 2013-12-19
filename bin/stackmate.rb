@@ -16,7 +16,7 @@ opt_parser = OptionParser.new do |opts|
   opts.on(:REQUIRED, "--template-file FILE", String, "Path to the file that contains the template") do |f|
     options[:file] = f
   end
-  opts.on("-p", "--parameters [KEY1=VALUE1 KEY2=VALUE2..]", "Parameter values used to create the stack.") do |p|
+  opts.on("-p", "--parameters [KEY1=VALUE1;KEY2=VALUE2;..]", "Parameter values used to create the stack.") do |p|
     options[:params] = p
     puts p
   end
@@ -27,6 +27,10 @@ opt_parser = OptionParser.new do |opts|
   options[:dry_run] = false
   opts.on("-r", "--dry-run", "Parse and pretend to execute but not actually do anything. Useful for validating the template") do
     options[:dry_run] = true
+  end
+  options[:no_rollback] = false
+  opts.on("-R", "--no-rollback", "Do not rollback on failure") do
+    options[:no_rollback] = true
   end
   opts.on("-h", "--help", "Show this message")  do
     puts opts
@@ -73,7 +77,7 @@ if options[:file] && stack_name != ''
       StackMate.configure('NOOP') if options[:dry_run]
       opts = {}
       api_opts = {:APIKEY => "#{ENV['APIKEY']}", :SECKEY => "#{ENV['SECKEY']}", :URL => "#{ENV['URL']}" }
-      p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts, options[:timeout], options[:plugins])
+      p = StackMate::StackExecutor.new(options[:file], stack_name, options[:params], engine, options[:wait_conditions], api_opts, options[:timeout], options[:plugins], options[:no_rollback])
       p.launch()
       nil
     end
