@@ -58,6 +58,7 @@ For example
 $ export APIKEY=upf7L-tvcHFCSYhKhw-45l9IfaKXNQSWf0nXyWye6eqOBpLT5TqN8XQGeuloV3LbSwD6zuucz22L233Nrqg2pg
 $ export SECKEY=9iSsuImdUxU0oumHu0p11li4IoUtwcvrSHcU63ZHS_y-4Iz3w5xPROzyjZTUXkhI9E7dy0r3vejzgCmaQfI-yw
 $ export URL="http://localhost:8080/client/api"
+$ export WAIT_COND_URL_BASE="http://<my ip>:<some port>/"
 ```
 
 ## Sample Templates

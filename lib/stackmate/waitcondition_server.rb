@@ -8,8 +8,11 @@ require 'stackmate/participants/common'
 module StackMate
 
   class WaitConditionServer < Sinatra::Base
+    @@url_base = ENV['WAIT_COND_URL_BASE']?ENV['WAIT_COND_URL_BASE']:StackMate::WAIT_COND_URL_BASE_DEFAULT
     set :static, false
     set :run, true
+    set :bind, Proc.new { URI.parse(@@url_base).host}
+    set :port, Proc.new { URI.parse(@@url_base).port}
 
     def initialize()
       super
@@ -23,7 +26,6 @@ module StackMate
       'success
     '
     end
-
 
     run! if app_file == $0
 

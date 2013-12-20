@@ -10,6 +10,7 @@ require 'time'
 
 module StackMate
 
+  WAIT_COND_URL_BASE_DEFAULT = 'http://localhost:4567/'
 
   # class ParamHandle < Ruote::Participant
   #   include Logging
@@ -25,7 +26,8 @@ module StackMate
     def create
       logger.debug "Entering #{participant_name} "
       workitem[participant_name] = {}
-      presigned_url = 'http://localhost:4567/waitcondition/' + workitem.fei.wfid + '/' + participant_name
+      wait_cond_base = ENV['WAIT_COND_URL_BASE']?ENV['WAIT_COND_URL_BASE']:'http://localhost:4567/'
+      presigned_url = wait_cond_base + '/waitcondition/' + workitem.fei.wfid + '/' + participant_name
       workitem.fields['ResolvedNames'][participant_name] = presigned_url
       logger.info "Your pre-signed URL is: #{presigned_url} "
       logger.info "Try: \ncurl -X PUT --data 'foo' #{presigned_url}"
