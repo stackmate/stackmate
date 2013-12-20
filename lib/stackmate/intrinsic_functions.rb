@@ -105,9 +105,9 @@ module StackMate
     def fn_base64(value, workitem)
       case value
       when String
-        Base64.urlsafe_encode64(value)
+        Base64.strict_encode64(value)
       when Hash
-        Base64.urlsafe_encode64(intrinsic(value, workitem))
+        Base64.strict_encode64(intrinsic(value, workitem))
       end
     end
   end
