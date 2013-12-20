@@ -1,7 +1,3 @@
-require 'rufus-json/automatic'
-require 'ruote'
-require 'ruote/storage/fs_storage'
-require 'json'
 require 'sinatra/base'
 require 'stackmate/participants/common'
 

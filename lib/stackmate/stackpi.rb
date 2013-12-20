@@ -1,10 +1,5 @@
-require 'ruote'
-require 'ruote/storage/hash_storage'
-require 'optparse'
 require 'stackmate'
-require 'stackmate/classmap'
-#require 'stackmate/waitcondition_server'
-#require 'stackmate/logging'
+
 #API for creating stack
 #TODO clean up repeated code
 
