@@ -29,6 +29,7 @@ module StackMate
           p args
           result_obj = make_async_request('authorizeSecurityGroupEgress',args)
           resource_obj = result_obj['securitygroup']['egressrule'.downcase][0]
+
           #doing it this way since it is easier to change later, rather than cloning whole object
           resource_obj.each_key do |k|
             val = resource_obj[k]
@@ -38,6 +39,7 @@ module StackMate
             workitem[@name][k] = val
           end
           set_tags(@props['tags'],workitem[@name]['physical_id'],"SecurityGroupEgress") if @props.has_key?('tags')
+          set_metadata if workitem['Resources'][@name].has_key?('Metadata')
           workitem['ResolvedNames'][@name] = name_cs
           workitem['IdMap'][workitem[@name]['physical_id']] = @name
         
@@ -62,6 +64,7 @@ module StackMate
             if (!(result_obj['error'] == true))
               logger.info("Successfully deleted resource #{@name}")
             else
+              workitem[@name]['delete_error'] = true
               logger.info("CloudStack error while deleting resource #{@name}")
             end
           else

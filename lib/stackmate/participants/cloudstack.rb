@@ -5,7 +5,7 @@ require 'yaml'
 require 'stackmate/logging'
 require 'stackmate/intrinsic_functions'
 require 'stackmate/resolver'
-
+require 'stackmate/metadata'
 
 module StackMate
 
@@ -33,6 +33,12 @@ module StackMate
     def on_workitem
       p workitem.participant_name
       reply
+    end
+
+    def set_metadata
+      resolved_metadata = recursive_resolve(workitem['Resources'][@name]['Metadata'],workitem)
+      stack_id = @resolved_names["CloudStack::StackId"]
+      Metadata.add_metadata(stack_id,@name,resolved_metadata)
     end
 
     protected
@@ -80,7 +86,7 @@ module StackMate
         #resp = @client.send(cmd, args)
         resp = @client.api_call(cmd,args)
         jobid = resp['jobid'] if resp
-        resp = api_poll(jobid, 60, 5) if jobid
+        resp = api_poll(jobid, 3, 3) if jobid
         return resp
       rescue => e
         logger.error("Failed to make request #{cmd} to CloudStack server while creating resource #{@name}")

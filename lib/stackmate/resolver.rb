@@ -37,7 +37,7 @@ module StackMate
     STRINGEXP = /.+/
     INTEXP = /[0-9]+/
     UUIDEXP = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
-
+    @@intrinsics = ["Ref","Fn::Join","Fn::GetAtt","Fn::Select","Fn::FindInMap","Fn::Base64"]
     def get_resolved(lookup_data,workitem)
       case lookup_data
       when String
@@ -117,6 +117,33 @@ module StackMate
 
     def resolve_to_deviceid(devicename)
       @devicename_map[devicename.downcase]
+    end
+
+    def recursive_resolve(lookup_data,workitem)
+      case lookup_data
+      when String
+        lookup_data
+      when Array
+        return_array = []
+        lookup_data.each do |data|
+          return_array.push(recursive_resolve(data,workitem))
+        end
+        return_array
+      when Hash
+        return_hash = {}
+        #key = lookup_data.keys[0]
+        #p lookup_data.keys
+        lookup_data.keys.each do |key|
+          val = lookup_data[key]
+          if(@@intrinsics.include?(key))
+            #Intrinsic functions work without nesting and so return
+            return intrinsic(lookup_data,workitem)
+          else
+            return_hash[key] = recursive_resolve(val,workitem)
+          end
+        end
+        return return_hash
+      end
     end
   end
 end
