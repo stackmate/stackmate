@@ -38,7 +38,16 @@ module StackMate
     def set_metadata
       resolved_metadata = recursive_resolve(workitem['Resources'][@name]['Metadata'],workitem)
       stack_id = @resolved_names["CloudStack::StackId"]
-      Metadata.add_metadata(stack_id,@name,resolved_metadata)
+      data = {}
+      data['Description'] = workitem['Resources'][@name]['Description']
+      data['ResourceType'] = workitem['Resources'][@name]['Type']
+      data['LogicalResourceId'] = @name
+      data['Metadata'] = resolved_metadata
+      data['PhysicalResourceId'] = workitem[@name]['physical_id']
+      data['ResourceStatus'] = 'CREATED'
+      data['StackId'] = @resolved_names["CloudStack::StackId"]
+      data['StackName'] = @resolved_names["CloudStack::StackName"]
+      Metadata.add_metadata(stack_id,@name,data)
     end
 
     protected
@@ -99,19 +108,33 @@ module StackMate
     end
 
     def api_poll (jobid, num, period)
-      i = 0
-      loop do
-        break if i > num
-        #resp = @client.queryAsyncJobResult({'jobid' => jobid})
+      # i = 0
+      # loop do
+      #   break if i > num
+      #   #resp = @client.queryAsyncJobResult({'jobid' => jobid})
+      #   resp = @client.api_call("queryAsyncJobResult",{'jobid' => jobid})
+      #   if resp
+      #     return resp['jobresult'] if resp['jobstatus'] == 1
+      #     return {'error' => true} if resp['jobstatus'] == 2
+      #   end
+      #   sleep(period)
+      #   i += 1
+      # end
+      # return {}
+      jobstatus = 0
+      jobresult = {}
+      iters = 100000 #to avoid infiinte loop
+      while (jobstatus == 0 && iters > 0) do
+        iters -= 1
         resp = @client.api_call("queryAsyncJobResult",{'jobid' => jobid})
         if resp
-          return resp['jobresult'] if resp['jobstatus'] == 1
-          return {'error' => true} if resp['jobstatus'] == 2
+          jobstatus = resp['jobstatus']
+          jobresult = resp['jobresult']
         end
         sleep(period)
-        i += 1
       end
-      return {}
+      return jobresult if jobstatus == 1
+      return {'error' => true}
     end
 
   end

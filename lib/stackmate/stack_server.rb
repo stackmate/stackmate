@@ -30,6 +30,15 @@ module StackMate
       content_type :json
       Metadata.get_metadata(params[:stack_id],params[:logical_id]).to_json
     end
+
+    #AWS style actions
+    get '/' do
+      if "DescribeStackResource".eql?(params[:Action])
+        content_type :json
+        Metadata.get_metadata(params[:StackName],params[:LogicalResourceId]).to_json
+      end 
+    end
+
     run! if app_file == $0
   end
 

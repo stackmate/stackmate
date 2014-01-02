@@ -86,6 +86,7 @@ module StackMate
       resolved_params['AWS::StackId'] = stackname
       resolved_params['CloudStack::StackName'] = stackname
       resolved_params['CloudStack::StackId'] = stackname
+      resolved_params['CloudStack::StackMateApiURL'] = ENV['WAIT_COND_URL_BASE']?ENV['WAIT_COND_URL_BASE']:StackMate::WAIT_COND_URL_BASE_DEFAULT
       resolved_params
     end
 
