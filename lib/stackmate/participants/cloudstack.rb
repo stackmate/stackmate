@@ -42,12 +42,24 @@ module StackMate
       data['Description'] = workitem['Resources'][@name]['Description']
       data['ResourceType'] = workitem['Resources'][@name]['Type']
       data['LogicalResourceId'] = @name
-      data['Metadata'] = resolved_metadata
+      data['Metadata'] = resolved_metadata.to_json
       data['PhysicalResourceId'] = workitem[@name]['physical_id']
-      data['ResourceStatus'] = 'CREATED'
+      data['ResourceStatus'] = 'CREATE_COMPLETE'
+      data['ResourceStatusReason'] = 'StackMate_Resource'
       data['StackId'] = @resolved_names["CloudStack::StackId"]
       data['StackName'] = @resolved_names["CloudStack::StackName"]
-      Metadata.add_metadata(stack_id,@name,data)
+      data['LastUpdatedTimestamp'] = Time.new.to_i
+      respmetadata = {}
+      #TODO figure out a good workaround for this
+      respmetadata['RequestId'] = "be8e5b39-40b7-11e3-90b2-d9d62a5d5348"
+      data['ResponseMetadata'] = respmetadata
+      detail = {}
+      detail['StackResourceDetail'] = data
+      result = {}
+      result['DescribeStackResourceResult'] = detail
+      response = {}
+      response['DescribeStackResourceResponse'] = result
+      Metadata.add_metadata(stack_id,@name,response)
     end
 
     protected
