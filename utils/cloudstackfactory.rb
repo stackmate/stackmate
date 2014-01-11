@@ -23,6 +23,9 @@ module StackMate
         id_tag = 'ruleid'
         resource_tag = "result_obj['securitygroup']['#{gress}rule'.downcase][0]"
       end
+      if(class_name.eql?("EgressFirewallRule"))
+        resource_tag = "result_obj['firewallrule']"
+      end
       str = ""
       str = str + "require 'stackmate/participants/cloudstack'\n"
       str = str + "\nmodule StackMate\n"

@@ -24,7 +24,7 @@ module StackMate
           logger.info("Creating resource #{@name} with following arguments")
           p args
           result_obj = make_async_request('createEgressFirewallRule',args)
-          resource_obj = result_obj['EgressFirewallRule'.downcase]
+          resource_obj = result_obj['firewallrule']
 
           #doing it this way since it is easier to change later, rather than cloning whole object
           resource_obj.each_key do |k|
