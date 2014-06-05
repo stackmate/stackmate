@@ -117,6 +117,11 @@ If you don't want the wait condition server to run, just use '-n'. Stackmate wil
 
 If you want to validate your template, you can use the --dry-run option. This will parse and validate the template and create an execution schedule.
 
+## CloudStack Metadata Support
+The AWS CloudFormation (cfn) helper scripts (see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html) have been ported to work in the CloudStack environment. 
+In addition a Windows Service "the cloudworks agent" has been written to process <script> fragments passed in user-data so that you can use the cfn scripts to process metadata from your templates and signal wait coniditions back to stackmate.
+The source for these can be downloaded from https://github.com/siwater/Cloudworks (there is a Visual Studio solution which will build a single MSI to install both the cloduworks agent and the cfn tools onto a Windows platform). 
+
 ## Extending StackMate to other APIs
 
 StackMate allows you to define your own workflow participants that will be called based on the template namespace. For example, you can define a class Foo::Bar
