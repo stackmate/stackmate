@@ -122,6 +122,11 @@ The AWS CloudFormation (cfn) helper scripts (see http://docs.aws.amazon.com/AWSC
 In addition a Windows Service "the cloudworks agent" has been written to process \<script\> fragments passed in user-data so that you can use the cfn scripts to process metadata from your templates and signal wait coniditions back to stackmate.
 The source for these can be downloaded from https://github.com/siwater/Cloudworks (there is a Visual Studio solution which will build a single MSI to install both the cloduworks agent and the cfn tools onto a Windows platform). 
 
+## StackMate Appliance
+If you don't fanacy building StackMate from source there is a pre-built Linux appliance (XVA format for XenServer) that you can download from URL-TBD to get you started quickly.
+This contains pre-installed tackmate and stacktician installations, with a set of sample templates to get you started. 
+Also contained in the distribution are the cloudworks MSI for installation on Windows images in CloudStack, and a document containing a step-by-step guide to using the appliance
+
 ## Extending StackMate to other APIs
 
 StackMate allows you to define your own workflow participants that will be called based on the template namespace. For example, you can define a class Foo::Bar
