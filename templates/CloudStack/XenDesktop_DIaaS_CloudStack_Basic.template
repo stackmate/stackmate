@@ -1,0 +1,622 @@
+{
+	"CSTemplateFormatVersion" : "1",
+  
+	"Description" : "StackMate template for XenDesktop farm consisting of domain controller, XenDesktop controller and VDA instance ready to be templated",
+  
+	"Parameters" : {
+  	    "VpcId": {
+			"Description":"ID of the Virtual Private Cloud (if any)",
+			"Type":"String",
+			"Default" : "none"
+		},	
+		"ZoneId": {
+             "Description":"ID of the zone",
+             "Type":"String"
+        },
+		"NetworkId":{
+             "Description" : "ID of the network",
+             "Type" : "String"
+        },
+		"SecurityGroupNames":{
+			"Description":"Comma separated names of the security groups to use",
+			"Type":"String",
+			"Default" : "default"
+        },
+		"TemplateId":{
+         "Description":"ID of the VM template for the servers (DC, XenDesktop Controller)",
+         "Type":"String"
+        },
+	    "VdaTemplateId": {
+            "Description":"ID of the VM template for the VDA agent",
+            "Type":"String"
+        },
+		"ServiceOfferingId": {
+         "Description":"ID of the serviceoffering ",
+         "Type":"String"
+      },
+	    "XDServiceOfferingId": {
+			"Description":"ID of the serviceoffering for the XenDesktop Controller",
+			"Type" : "String"
+        },
+		"DomainDNSName" : {
+			"Description" : "Fully qualified domain name (FQDN) of the forest root domain e.g. corp.example.com",
+			"Type" : "String",
+			"Default" : "cloudworks.local",
+			"MinLength" : "3",
+			"MaxLength" : "25",
+			"AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+		},
+		"DCServerName" : {
+			"Description" : "NetBios name for the domain controller",
+			"Type" : "String",
+			"Default" : "DC01",
+			"MinLength" : "3",
+			"MaxLength" : "16",
+			"AllowedPattern" : "[a-zA-Z0-9]+"
+		},
+		"XDCServerName" : {
+			"Description" : "NetBios name for the Xendesktop controller",
+			"Type" : "String",
+			"Default" : "XDC01",
+			"MinLength" : "3",
+			"MaxLength" : "16",
+			"AllowedPattern" : "[a-zA-Z0-9]+"
+		},
+		"VdaName" : {
+			"Description" : "NetBios name for the VDA",
+			"Type" : "String",
+			"Default" : "VDA01",
+			"MinLength" : "3",
+			"MaxLength" : "16",
+			"AllowedPattern" : "[a-zA-Z0-9]+"
+		},
+		"AdminPassword" : {
+			"Description" : "Password for the domain administrator account",
+			"Type" : "String",
+			"MinLength" : "8",
+			"MaxLength" : "32",
+			"NoEcho" : "True"
+		},
+		"TrustedDomainName" : {
+			"Description" : "Fully qualified domain name (FQDN) of the domain to trust e.g. corp.example.com",
+			"Type" : "String",
+			"Default" : "enterprise.local",
+			"MinLength" : "3",
+			"MaxLength" : "25",
+			"AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+		},
+		"TrustPassword" : {
+			"Description" : "Password for the trust relationship",
+			"Type" : "String",
+			"Default" : "Citrix123",
+			"MinLength" : "8",
+			"MaxLength" : "32",
+			"NoEcho" : "True"
+		},
+		"TrustedDomainDNSServerIP" : {
+			"Description" : "IP address of the DNS server to use to resolve the trusted domain name",
+			"Type" : "String",
+			"MinLength" : "7",
+			"MaxLength" : "15"
+		},
+		"CitrixLicenseServer" : {
+			"Description" : "Name or IP address of Citrix License server e.g. license.example.com",
+			"Type" : "String"
+		},
+		"CloudStackUrl" : {
+			"Description" : "Url of Cloudstack server (e.g. http://192.168.2.1:8080/client/api)",
+			"Type" : "String"
+		},
+		"EntAdminApiKey" : {
+			"Description" : "API Key of the CloudStack account for the Enterprise admin",
+			"Type" : "String"
+		},
+		"EntAdminSecretKey" : {
+			"Description" : "Secret Key of the CloudStack account for the Enterprise admin",
+			"Type" : "String"
+		},
+		"KmsServerAddress" : {
+			"Description" : "IP address or DNS name of the KMS server (if required). A SRV record will be inserted in AD if specified",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"NetscalerDNSName" : {
+			"Description" : "Optional FQDN of the Netscaler Gateway for remote access E.g. tenant1-gateway.csp.com",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"NetscalerIP" : {
+			"Description" : "Optional NSIP address of the Netscaler Gateway (if you want a virtual server to be created)",
+			"Type" : "String",
+			"Default" : ""
+		}
+	},
+  
+	"Resources" : { 
+      
+		"DomainController": {  
+			"Type": "CloudStack::VirtualMachine",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"config" : {
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip" 
+						},          
+						"commands" : {												
+							"a-reset-password" : {
+								"command" :  { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\ResetLocalAccount.cmd -UserName Administrator -Password ",
+									{ "Ref" : "AdminPassword" }
+								]]},
+								"waitAfterCompletion" : "0"
+							},				  
+							"b-rename-computer" : {
+								"command" : { "Fn::Join" : [ "", [
+									 "C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ", { "Ref" : "DCServerName" }
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"c1-create-domain" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\CreateDomain.cmd -DomainName ", { "Ref" : "DomainDNSName" },
+									" -SafeModePassword ", { "Ref" : "AdminPassword" }						
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"c2-wait-a-while-for-dns-to-start" : {
+								"command" : "timeout 10",
+								"waitAfterCompletion" : "0"
+							},
+							"d-set-dns-forwarder" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\SetDnsForwarder.cmd -DnsZone ", 	{ "Ref" : "TrustedDomainName" },
+									" -DnsServerAddress ", { "Ref" : "TrustedDomainDNSServerIP" }
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+							"e-create-trust" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\CreateTrustRelationship.cmd -TargetDomainName ", { "Ref" : "TrustedDomainName" },
+									" -Direction Outbound",
+									" -TrustPassword ", { "Ref" : "TrustPassword" }
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+					        "f-add-kms-srv-record" : {
+								"test" : { "Fn::Join" : [ "", [ "C:\\cfn\\scripts\\IsDefined.cmd ", { "Ref" : "KmsServerAddress" } ]]},
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\AddKmsServiceRecord.cmd -KmsServerAddress ", { "Ref" : "KmsServerAddress" }, " -Zone ", 	{ "Ref" : "DomainDNSName" }	
+								]]},
+								"waitAfterCompletion" : "0"
+							},					
+							"z-signal-completion" : { 
+								"command" : { "Fn::Join" : ["", [ "cfn-signal.exe -e 0 \"", { "Ref" : "DomainControllerWaitHandle" },"\"" ]] },
+								"waitAfterCompletion" : "0"
+							}						
+						}
+					}
+				}
+			},
+			"Properties": {
+				"displayname" :  { "Fn::Join" : [ ".", [ { "Ref" : "DCServerName" }, { "Ref" : "DomainDNSName" } ]]},
+				"name" : { "Ref" : "DCServerName" },
+				"templateid" : { "Ref" : "TemplateId" },
+				"serviceofferingid" : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : { "Ref" : "ZoneId" },
+				"securitygroupnames" : { "Ref" : "SecurityGroupNames" },
+				"userdata" : { "Fn::Base64" : { "Fn::Join" : ["", [
+					"<script>\n",
+						"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+						"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+						" -r DomainController ",  "\n",
+					"</script>"          
+				]]}}
+            }
+		},
+
+		"DomainControllerWaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+						
+		"DomainControllerWaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "DomainController",
+			"Properties" : {
+				"Handle" : {"Ref" : "DomainControllerWaitHandle"},
+				"Timeout" : "3600"
+			}
+		},
+
+		"XenDesktopController": {  
+			"Type" : "CloudStack::VirtualMachine",
+			"DependsOn" : "DomainControllerWaitCondition",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"config" : {
+						"files" : {
+							"C:\\cfn\\xd\\Xendesktop7_5.iso" : {
+								"source" : "http://s3.amazonaws.com/citrix-cloudworks/XenApp_and_XenDesktop7_5.iso"
+							},
+							"C:\\cfn\\xd\\elaborate-bytes.cer" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/elaborate-bytes.cer"
+							},
+							"C:\\cfn\\xd\\CITRIXRootCA.cer" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/CITRIXRootCA.cer"
+							},
+							"C:\\cfn\\xd\\SetupVirtualCloneDrive5470.exe" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/SetupVirtualCloneDrive5470.exe"
+							},
+							"C:\\cfn\\xd\\DT2.Setup.msi" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/latest/DT2.Setup.msi"
+							}
+						},
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip" 
+						},     
+						"commands" : {
+							"a-rename-computer" : {
+								"command" : { "Fn::Join" : ["", [
+									"C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ",
+									{ "Ref" : "XDCServerName" }
+								]] },
+								"waitAfterCompletion" : "forever"
+							},
+							"b-set-dns-server" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\SetDnsConfiguration.cmd -DnsServers ", 
+									{ "Fn::GetAtt" : [ "DomainController", "PrivateIp" ] }
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"c-install-cert" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"certutil -enterprise -addstore \"TrustedPublisher\" C:\\cfn\\xd\\elaborate-bytes.cer"
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"d-install-clonedrive" : {
+								"command" : { "Fn::Join" : ["", [ 							
+									"C:\\cfn\\scripts\\InstallCloneDrive.cmd" 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"e-join-domain" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\JoinDomain.cmd -DomainName ", { "Ref" : "DomainDNSName" }, 
+									" -UserName Administrator ", 
+									" -Password ", { "Ref" : "AdminPassword" } 
+								]] },
+								"waitAfterCompletion" : "forever"
+							},						
+							"f-mount-xendesktop-iso" : {
+								"command" : "C:\\cfn\\scripts\\MountIso.cmd -IsoPath \"C:\\cfn\\xd\\XenDesktop7_5.iso\"",
+								"waitAfterCompletion" : "0"
+							},										
+							"g-install-xendesktop-ddc" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDInstallSingleServer.cmd -InstallerPath 'E:\\x64\\XenDesktop Setup' -Reboot"							
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"h-create-xendesktop-site" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDCreateSite.cmd -LicenseServer ", { "Ref" : "CitrixLicenseServer" },
+									" -Administrator administrator@", { "Ref" : "DomainDNSName" }	
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+							"i-create-xendesktop-resources" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDCreateResources.cmd -CloudStackUrl ", { "Ref" : "CloudStackUrl" },
+									" -HostingUnitName CloudResources ",
+									" -ApiKey '", { "Ref" : "EntAdminApiKey" }, "'",
+									" -SecretKey '", { "Ref" : "EntAdminSecretKey" }, "'",
+									" -ZoneId ", { "Ref" : "ZoneId" },	
+									" -NetworkId ", { "Ref" : "NetworkId" },
+								    " -VpcId ", { "Ref" : "VpcId" }	
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+						   "j-configure-storefront-gateway" : {
+						        "test" : { "Fn::Join" : [ "", [ "C:\\cfn\\scripts\\IsDefined.cmd ", { "Ref" : "NetscalerDNSName" } ]]},
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\SFConfigureGateway.cmd -NetScalerUrl ", { "Fn::Join" : [ "", [ "https://", { "Ref" : "NetscalerDNSName" }, "/" ]]},
+									" -XenDesktopBaseUrl ", { "Fn::Join" : [ "", [ "http://", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]}, "/" ]]},
+									" -NetScalerCACert C:\\cfn\\xd\\CITRIXRootCA.cer"
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+						   "k1-setup-netscaler" : {
+						        "test" : { "Fn::Join" : [ "", [ "C:\\cfn\\scripts\\IsDefined.cmd ", { "Ref" : "NetscalerIP" } ]]},
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\NSSetup.cmd -NsIP ", { "Ref" : "NetscalerIP" }								
+								]]},
+								"waitAfterCompletion" : "0"
+							},							
+							"k2-create-netscaler-virtual-server" : {
+						        "test" : { "Fn::Join" : [ "", [ "C:\\cfn\\scripts\\IsDefined.cmd ", { "Ref" : "NetscalerIP" } ]]},
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\NSCreateVirtualServer.cmd -NsIP ", { "Ref" : "NetscalerIP" },
+									" -NetscalerAddress ", { "Ref" : "NetscalerDNSName" },
+									" -TenantDomain ", { "Ref" : "DomainDNSName" },
+									" -EnterpriseDomain ", { "Ref" : "TrustedDomainName" }								
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+							"l1-install-diaas-admin-app" : { 
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\InstallMsi.cmd -MsiPath C:\\cfn\\xd\\DT2.Setup.msi" 
+								]]},
+								"waitAfterCompletion" : "0"
+							},																	
+							"l2-configure-diaas-admin-app" : { 
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\DT2SetConfiguration -CloudStackUrl ",  { "Ref" : "CloudStackUrl" },							
+									" -ApiKey ", { "Ref" : "EntAdminApiKey" },
+									" -SecretKey ", { "Ref" : "EntAdminSecretKey" },
+									" -ZoneId ", { "Ref" : "ZoneId" },	
+									" -Hypervisor XenServer",
+									" -XenDesktopAdminAddress ", { "Fn::Join" : [ ":", [ 
+											{ "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]}, "80" 
+									]]},
+									" -XenDesktopHostingUnitName CloudResources", 
+									" -PowerShellScriptsFolder C:\\inetpub\\wwwroot\\Citrix\\CloudDesktop\\Utils", 
+									" -XenDesktopDomain ", { "Ref" : "DomainDNSName" },
+									" -XenDesktopDDC ", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]},
+									" -XenDesktopAvailabilityZone Zone1",
+									" -XenDesktopStoreFrontUrl ", { "Fn::Join" : [ "", [ 
+										"http://", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]}, "/Citrix/StoreWeb"
+									]]}
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+							"m-set-powershell-policy" : { 
+								"command" : "C:\\cfn\\scripts\\SetPowerShellExecutionPolicy.cmd -Policy Unrestricted",
+								"waitAfterCompletion" : "0"
+							},												
+							"z-signal-completion" : { 
+								"command" : { "Fn::Join" : ["", [ 
+									"cfn-signal.exe -e 0 \"", { "Ref" : "XDCWaitHandle" },"\"" 
+								]]},
+								"waitAfterCompletion" : "0"
+							}
+						}
+					}
+				}			
+			},
+      
+			"Properties": {
+				"displayname" :  { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]},
+				"name" : { "Ref" : "XDCServerName" },
+				"templateid" : { "Ref" : "TemplateId" },
+				"serviceofferingid" : { "Ref" : "XDServiceOfferingId" },
+				"zoneid" : { "Ref" : "ZoneId" },
+				"securitygroupnames" : { "Ref" : "SecurityGroupNames" },
+				"userdata" : { "Fn::Base64" : { "Fn::Join" : ["", [
+					"<script>\n",
+						"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+						"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+						" -r XenDesktopController ",  "\n",
+					"</script>"          
+				]]}}        
+			}
+		},
+
+		"XDCWaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+						
+		"XDCWaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "XenDesktopController",
+			"Properties" : {
+				"Handle" : {"Ref" : "XDCWaitHandle"},
+				"Timeout" : "10800"
+			}
+		},
+
+		"XenDesktopVda": {  
+			"Type" : "CloudStack::VirtualMachine",
+			"DependsOn" : "DomainControllerWaitCondition",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"configSets" : {
+						"default" : [ "initial-config" ],
+						"post-install" : [ "post-install-config" ]
+					},    
+					"initial-config" : {
+						"files" : {
+							"C:\\cfn\\xd\\Xendesktop7_5.iso" : {
+								"source" : "http://s3.amazonaws.com/citrix-cloudworks/XenApp_and_XenDesktop7_5.iso"
+							},
+							"C:\\cfn\\xd\\elaborate-bytes.cer" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/elaborate-bytes.cer"
+							},
+							"C:\\cfn\\xd\\SetupVirtualCloneDrive5470.exe" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/SetupVirtualCloneDrive5470.exe"
+							},
+							"C:\\cfn\\xd\\7z920-x64.msi" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/7z920-x64.msi"
+							},
+							"C:\\cfn\\re-init.cmd" : {
+								"content" : { "Fn::Join" : ["", [
+									"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+									"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, " -r XenDesktopVda ",  " -c post-install\n"							
+								]]}
+							}
+						},
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip" 
+						},     
+						"commands" : {
+							"a-rename-computer" : {
+								"command" : { "Fn::Join" : ["", [
+									"C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ",
+									{ "Ref" : "VdaName" }
+								]] },
+								"waitAfterCompletion" : "forever"
+							},
+							"b-set-dns-server" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\SetDnsConfiguration.cmd -DnsServers ", 
+									{ "Fn::GetAtt" : [ "DomainController", "PrivateIp" ] }
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"c-reset-dns-onboot" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\ResetDnsOnBoot.cmd -DnsServers ", 
+									{ "Fn::GetAtt" : [ "DomainController", "PrivateIp" ] }
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+								"d-install-cert" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"certutil -enterprise -addstore \"TrustedPublisher\" C:\\cfn\\xd\\elaborate-bytes.cer"
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"e-install-clonedrive" : {
+								"command" : { "Fn::Join" : ["", [ 							
+									"C:\\cfn\\scripts\\InstallCloneDrive.cmd" 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"f-install-7zip" : {
+								"command" : { "Fn::Join" : ["", [ 							
+									"C:\\cfn\\scripts\\InstallMsi.cmd -MsiPath C:\\cfn\\xd\\7z920-x64.msi" 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"g-join-domain" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\JoinDomain.cmd -DomainName ", { "Ref" : "DomainDNSName" }, 
+									" -UserName Administrator ", 
+									" -Password ", { "Ref" : "AdminPassword" } 
+								]] },
+								"waitAfterCompletion" : "forever"
+							},	
+							"h1-unpack-iso" : {
+							    "test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : "\"C:\\Program Files\\7-Zip\\7z.exe\" x C:\\cfn\\xd\\Xendesktop7_5.iso -oC:\\cfn\\xd\\Iso",
+								"waitAfterCompletion" : "0"
+							},																						
+							"h2-mount-iso" : {
+							    "test" :  "C:\\cfn\\scripts\\IsClientOs.cmd",
+								"command" : "C:\\cfn\\scripts\\MountIso.cmd -IsoPath \"C:\\cfn\\xd\\XenDesktop7_5.iso\"",
+								"waitAfterCompletion" : "0"
+							},
+							"i-enable-autologon-server" : {
+								"test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\AutoLogon.cmd -Enable -DomainName ", { "Ref" : "DomainDNSName" }, 
+									" -UserName Administrator@",  { "Ref" : "DomainDNSName" }, 
+									" -Password ", { "Ref" : "AdminPassword" } 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"j-register-post-install-task" : {
+								"test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : "C:\\cfn\\scripts\\RegisterPostInstallTask.cmd -Script C:\\cfn\\re-init.cmd",
+								"waitAfterCompletion" : "0"
+							},							
+							"k1-install-vda-server" : {
+								"test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDInstallVda.cmd -InstallerPath 'C:\\cfn\\xd\\Iso\\x64\\XenDesktop Setup' -Reboot",
+									" -Controller ", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]} 							
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+						    "k2-install-vda-client" : {
+							    "test" :  "C:\\cfn\\scripts\\IsClientOs.cmd",
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDInstallVda.cmd -InstallerPath 'E:\\x64\\XenDesktop Setup' -Reboot",
+									" -Controller ", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]} 							
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"z-signal-completion" : {
+								"test" :  "C:\\cfn\\scripts\\IsClientOs.cmd",
+								"command" : { "Fn::Join" : ["", [ 
+									"cfn-signal.exe -e 0 \"", { "Ref" : "VdaWaitHandle" },"\"" 
+								]]},
+								"waitAfterCompletion" : "0"
+							}
+						}
+					},
+					"post-install-config" : {
+						"commands" : {
+							"a-disable-autologon-server" : {
+								"command" : "C:\\cfn\\scripts\\AutoLogon.cmd -Disable",
+								"waitAfterCompletion" : "0"
+							},							
+							"b-reboot" : {
+								"command" : "shutdown -r -t 0",
+								"waitAfterCompletion" : "forever"
+							},
+							"c-remove-unpacked-iso" : {
+								"command" : "rmdir /s /q C:\\cfn\\xd\\Iso",
+								"waitAfterCompletion" : "0"
+							},
+							"z-signal-completion" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"cfn-signal.exe -e 0 \"", { "Ref" : "VdaWaitHandle" },"\"" 
+								]]},
+								"waitAfterCompletion" : "0"
+							}						
+						}
+					}
+				}
+			},
+      
+			"Properties": {
+				"displayname" :  { "Fn::Join" : [ ".", [ { "Ref" : "VdaName" }, { "Ref" : "DomainDNSName" } ]]},
+				"name" : { "Ref" : "VdaName" },
+				"templateid" : { "Ref" : "VdaTemplateId" },
+				"serviceofferingid" : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : { "Ref" : "ZoneId" },
+				"securitygroupnames" : { "Ref" : "SecurityGroupNames" },
+				"userdata" : { "Fn::Base64" : { "Fn::Join" : ["", [
+					"<script>\n",
+						"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+						"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+						" -r XenDesktopVda ",  "\n",
+					"</script>"          
+				]]}}        
+			}
+		},
+
+		"VdaWaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+						
+		"VdaWaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "XenDesktopVda",
+			"Properties" : {
+				"Handle" : {"Ref" : "VdaWaitHandle"},
+				"Timeout" : "10800"
+			}
+		}
+			
+	},   
+	"Outputs" : {
+		"DomainControllerId" : {
+			"Value" : { "Ref" : "DomainController" },
+			"Description" : "Domain Controller Id"
+		},
+		"DomainControllerPrivateIP" : {
+			"Value" : { "Fn::GetAtt" : [ "DomainController", "PrivateIp" ] },
+			"Description" : "Domain Controller Private IP address"
+		},
+		"XenDesktopControllerId" : {
+			"Value" : { "Ref" : "XenDesktopController" },
+			"Description" : "Xendesktop Controller Id"
+		},
+		"XenDesktopVDAId" : {
+			"Value" : { "Ref" : "XenDesktopVda" },
+			"Description" : "Xendesktop VDA Id"
+		}
+	}
+}

@@ -1,0 +1,246 @@
+{
+	"CSTemplateFormatVersion" : "1",
+  
+	"Description" : "CloudStack StackMate template to install a XenDesktop VDA in an existing domain.",
+  
+	"Parameters" : {
+		"ZoneId":{
+         "Description":"ID of the zone",
+         "Type":"String",
+		 "Default" : "fc4a4400-72db-41c6-9440-b3948e636018"
+      },
+		"NetworkId":{
+         "Description" : "ID of the network",
+         "Type" : "String",
+		 "Default" : "7797c076-c317-4626-9f0c-2da9f0550c79"
+      },
+		"TemplateId":{
+         "Description":"ID of the VM template ",
+         "Type":"String",
+		 "Default" : "e6982d53-1cf0-419b-9cd5-62d5c406fe45"
+      },
+		"ServiceOfferingId": {
+         "Description":"ID of the serviceoffering ",
+         "Type":"String",
+		 "Default" : "2cd86662-82ec-44f2-abe2-9176be25d003"
+      },
+		"VdaName" : {
+			"Description" : "NetBios name for the XenDesktop VDA",
+			"Type" : "String",
+			"Default" : "VDA01"
+		},	    
+		"XDCServerName" : {
+			"Description" : "Simple name of the XenDesktop Controller",
+			"Type" : "String",
+			"Default" : "XDC01"
+		 },	
+		"DomainDNSName" : {
+			"Description" : "Fully qualified domain name (FQDN) of the domain to join e.g. corp.example.com",
+			"Type" : "String"
+		},
+		"AdminPassword" : {
+			"Description" : "Password for the administrator account",
+			"Type" : "String",
+			"MinLength" : "8",
+			"MaxLength" : "32",
+			"NoEcho" : "True"
+		},
+		"DomainDNSServer" : {
+			"Description" : "IP address of the DNS server for the domain (usually the Domain Controller)",
+			"Type" : "String"	
+		}
+	},
+  
+	"Resources" : { 
+	
+		"XenDesktopVda": {  
+			"Type" : "CloudStack::VirtualMachine",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {  
+					"configSets" : {
+						"default" : [ "initial-config" ],
+						"post-install" : [ "post-install-config" ]
+					},    
+					"initial-config" : {
+						"files" : {
+							"C:\\cfn\\xd\\Xendesktop7_5.iso" : {
+								"source" : "http://s3.amazonaws.com/citrix-cloudworks/XenApp_and_XenDesktop7_5.iso"
+							},
+							"C:\\cfn\\xd\\elaborate-bytes.cer" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/elaborate-bytes.cer"
+							},
+							"C:\\cfn\\xd\\SetupVirtualCloneDrive5470.exe" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/SetupVirtualCloneDrive5470.exe"
+							},
+							"C:\\cfn\\xd\\7z920-x64.msi" : {
+								"source" : "https://s3.amazonaws.com/citrix-cloudworks/7z920-x64.msi"
+							},
+							"C:\\cfn\\re-init.cmd" : {
+								"content" : { "Fn::Join" : ["", [
+									"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+									"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, " -r XenDesktopVda ",  " -c post-install\n"							
+								]]}
+							}
+						},
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip" 
+						},     
+						"commands" : {
+							"a-rename-computer" : {
+								"command" : { "Fn::Join" : ["", [
+									"C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ",
+									{ "Ref" : "VdaName" }
+								]] },
+								"waitAfterCompletion" : "forever"
+							},
+							"b-set-dns-server" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\SetDnsConfiguration.cmd -DnsServers ", 
+									{ "Ref" : "DomainDNSServer" }
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"c-reset-dns-onboot" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\ResetDnsOnBoot.cmd -DnsServers ", 
+									{ "Ref" : "DomainDNSServer" }
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"d-install-cert" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"certutil -enterprise -addstore \"TrustedPublisher\" C:\\cfn\\xd\\elaborate-bytes.cer"
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"e-install-clonedrive" : {
+								"command" : { "Fn::Join" : ["", [ 							
+									"C:\\cfn\\scripts\\InstallCloneDrive.cmd" 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"f-install-7zip" : {
+								"command" : { "Fn::Join" : ["", [ 							
+									"C:\\cfn\\scripts\\InstallMsi.cmd -MsiPath C:\\cfn\\xd\\7z920-x64.msi" 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"g-join-domain" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\JoinDomain.cmd -DomainName ", { "Ref" : "DomainDNSName" }, 
+									" -UserName Administrator ", 
+									" -Password ", { "Ref" : "AdminPassword" } 
+								]] },
+								"waitAfterCompletion" : "forever"
+							},	
+							"h1-unpack-iso" : {
+							    "test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : "\"C:\\Program Files\\7-Zip\\7z.exe\" x C:\\cfn\\xd\\Xendesktop7_5.iso -oC:\\cfn\\xd\\Iso",
+								"waitAfterCompletion" : "0"
+							},																						
+							"h2-mount-iso" : {
+							    "test" :  "C:\\cfn\\scripts\\IsClientOs.cmd",
+								"command" : "C:\\cfn\\scripts\\MountIso.cmd -IsoPath \"C:\\cfn\\xd\\XenDesktop7_5.iso\"",
+								"waitAfterCompletion" : "0"
+							},
+							"i-enable-autologon-server" : {
+								"test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : { "Fn::Join" : ["", [ 
+									"C:\\cfn\\scripts\\AutoLogon.cmd -Enable -DomainName ", { "Ref" : "DomainDNSName" }, 
+									" -UserName Administrator@",  { "Ref" : "DomainDNSName" }, 
+									" -Password ", { "Ref" : "AdminPassword" } 
+								]] },
+								"waitAfterCompletion" : "0"
+							},
+							"j-register-post-install-task" : {
+								"test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : "C:\\cfn\\scripts\\RegisterPostInstallTask.cmd -Script C:\\cfn\\re-init.cmd",
+								"waitAfterCompletion" : "0"
+							},							
+							"k1-install-vda-server" : {
+								"test" :  "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDInstallVda.cmd -InstallerPath 'C:\\cfn\\xd\\Iso\\x64\\XenDesktop Setup' -Reboot",
+									" -Controller ", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]} 							
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+						    "k2-install-vda-client" : {
+							    "test" :  "C:\\cfn\\scripts\\IsClientOs.cmd",
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\XDInstallVda.cmd -InstallerPath 'E:\\x64\\XenDesktop Setup' -Reboot",
+									" -Controller ", { "Fn::Join" : [ ".", [ { "Ref" : "XDCServerName" }, { "Ref" : "DomainDNSName" } ]]} 							
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"z-signal-completion" : {
+								"test" :  "C:\\cfn\\scripts\\IsClientOs.cmd",
+								"command" : { "Fn::Join" : ["", [ 
+									"cfn-signal.exe -e 0 \"", { "Ref" : "VdaWaitHandle" },"\"" 
+								]]},
+								"waitAfterCompletion" : "0"
+							}
+						}
+					},
+					"post-install-config" : {
+						"commands" : {
+							"a-disable-autologon-server" : {
+								"command" : "C:\\cfn\\scripts\\AutoLogon.cmd -Disable",
+								"waitAfterCompletion" : "0"
+							},							
+							"b-reboot" : {
+								"command" : "shutdown -r -t 0",
+								"waitAfterCompletion" : "forever"
+							},
+							"c-remove-unpacked-iso" : {
+								"command" : "rmdir /s /q C:\\cfn\\xd\\Iso",
+								"waitAfterCompletion" : "0"
+							},
+							"z-signal-completion" : {
+								"command" : { "Fn::Join" : ["", [ 
+									"cfn-signal.exe -e 0 \"", { "Ref" : "VdaWaitHandle" },"\"" 
+								]]},
+								"waitAfterCompletion" : "0"
+							}						
+						}
+					}
+			    }	
+			},
+      
+			"Properties": {
+				"displayname" :  { "Fn::Join" : [ ".", [ { "Ref" : "VdaName" }, { "Ref" : "DomainDNSName" } ]]},
+				"name" : { "Ref" : "VdaName" },
+				"templateid" : { "Ref" : "TemplateId" },
+				"serviceofferingid" : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : { "Ref" : "ZoneId" },
+				"securitygroupnames" : "default" ,
+				"userdata" : { "Fn::Base64" : { "Fn::Join" : ["", [
+					"<script>\n",
+						"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+						"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+						" -r XenDesktopVda ",  "\n",
+					"</script>"          
+				]]}}        
+			}
+		},
+
+		"VdaWaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+						
+		"VdaWaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "XenDesktopVda",
+			"Properties" : {
+				"Handle" : {"Ref" : "VdaWaitHandle"},
+				"Timeout" : "10800"
+			}
+		}
+	},   
+	"Outputs" : {
+		"XenDesktopVDAId" : {
+			"Value" : { "Ref" : "XenDesktopVda" },
+			"Description" : "Xendesktop VDA Id"
+		}
+	}
+}

@@ -1,0 +1,128 @@
+{
+	"CSTemplateFormatVersion" : "1",
+
+	"Description" : "This template creates a standalone Citrix license server in an advanced zone network.",
+
+	"Parameters" : {
+		"ZoneId":{
+         "Description":"ID of the zone to create stack",
+         "Type":"String"
+      },
+		"ServerName":{
+         "Description":"Name of the server",
+         "Type":"String",
+		 "Default" : "windows-server"
+      },
+		"TemplateId":{
+         "Description":"ID of the VM template",
+         "Type":"String"
+      },
+		"ServiceOfferingId":{
+         "Description":"ID of the serviceoffering",
+         "Type":"String"
+      },
+		"NetworkId":{
+         "Description":"ID of the network",
+         "Type":"String"
+      },		
+		"AdminPassword" : {
+			"Description" : "Password for the administrator account",
+			"Type" : "String",
+			"Default" : "Citrix123",
+			"MinLength" : "8",
+			"MaxLength" : "32",
+			"NoEcho" : "True"
+		}
+	},
+
+	"Resources" : {
+	
+		"LicenseServer": {  
+			"Type" : "CloudStack::VirtualMachine",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"config" : {
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip" ,
+							"C:\\cfn\\license" : "https://s3.amazonaws.com/citrix-cloudworks/CitrixLicenseServer-11.11.1.zip"
+						}, 
+						"files" : {
+							"C:\\cfn\\license\\XDS_RETAIL_ALL_EDITION_PROD.lic" : {
+								"source" : "http://192.168.10.2/XDS_RETAIL_ALL_EDITION_PROD.lic"
+							}
+						},
+						"commands" : {
+							"a-reset-password" : {
+								"command" :  { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\ResetLocalAccount.cmd -UserName Administrator -Password ",
+									{ "Ref" : "AdminPassword" }
+								]]},
+								"waitAfterCompletion" : "0"
+							},				  
+							"b-rename-computer" : {
+								"command" : { "Fn::Join" : [ "", [
+									 "C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ", { "Ref" : "ServerName" }
+								]]},
+								"waitAfterCompletion" : "forever"
+							},									
+							"c-install-license-server" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\InstallMsi.cmd -MsiPath 'C:\\cfn\\license\\CTX_Licensing.msi'"							
+								]]},
+								"waitAfterCompletion" : "0"
+							},
+							"d-install-xd-license" : {
+								"command" : "C:\\cfn\\scripts\\InstallCtxLicense.cmd -Path C:\\cfn\\license\\XDS_RETAIL_ALL_EDITION_PROD.lic",
+								"waitAfterCompletion" : "0"
+							},
+							"z-signal-completion" : { 
+								"command" : { "Fn::Join" : ["", [ "cfn-signal.exe -e 0 \"", { "Ref" : "WaitHandle" },"\"" ]] },
+								"waitAfterCompletion" : "0"
+							}
+						}
+					}
+				}
+			},
+      
+			"Properties": {
+			    "displayname" :  { "Ref" : "ServerName" },
+				"templateid" : {"Ref":"TemplateId"},
+				"serviceofferingid"   : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : {"Ref" : "ZoneId"},
+				"name" :  {"Ref" : "ServerName"},
+				"networkids" : {"Ref" : "NetworkId"},
+				"userdata"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+					"<script>",
+						"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+						"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+						" -r LicenseServer ", "\n",
+					"</script>"
+				]]}}        				
+			}
+		},
+
+		"WaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+
+		"WaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "LicenseServer",
+			"Properties" : {
+				"Handle" : {"Ref" : "WaitHandle"},
+				"Timeout" : "1800"
+			}
+		}
+    },
+
+	"Outputs" : {
+		"ServerId" : {
+			"Value" : { "Ref" : "LicenseServer" },
+			"Description" : "License Server Id"
+		},
+		"LicenseServerPrivateIP" : {
+			"Value" : { "Fn::GetAtt" : [ "LicenseServer", "PrivateIp" ] },
+			"Description" : "License Server private IP address"
+		}
+	}
+}

@@ -1,0 +1,121 @@
+{
+	"CSTemplateFormatVersion" : "1",
+  
+	"Description" : "CloudStack StackMate sample template: Create a single Windows instance, give the server the specified name and then signal WaitCondition.",
+  
+	"Parameters" : {
+		"ZoneId":{
+			"Description":"ID of the zone to create stack",
+			"Type":"String"
+		},
+		"ServerName":{
+			"Description":"Name of the instance",
+			"Type":"String"
+		},
+		"TemplateId":{
+			"Description":"ID of the VM template",
+			"Type":"String"
+		},
+		"ServiceOfferingId":{
+			"Description":"ID of the serviceoffering",
+			"Type":"String"
+		},
+		"NetworkId":{
+			"Description":"ID of the network",
+			"Type":"String"
+		},
+		"OptionalParam" : {
+			"Description":"An optional parameter",
+			"Type":"String",
+			"Default" : ""
+		}
+	},
+  
+	"Resources" : {     
+      
+		"WindowsServer": {  
+			"Type": "CloudStack::VirtualMachine",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"config" : {
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip"						
+						},       
+						"commands" : {
+							"a-rename-computer" : {
+								"command" : { "Fn::Join" : [ "", [
+									 "C:\\cfn\\scripts\\RenameComputer.cmd -Reboot -ComputerName ", { "Ref" : "ServerName" }
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"b-test-simple-condition" : {
+								"test" : "exit 1",
+								"command" : "echo This command will not execute",
+								"waitAfterCompletion" : "0"	
+							},
+							"c-test-if-server-os" : {
+								"test" : "C:\\cfn\\scripts\\IsServerOs.cmd",
+								"command" : "echo This command will execute on a server OS but not on client OS",
+								"waitAfterCompletion" : "0"	
+							},					
+							"d-test-optional-param" : {
+								"test" : { "Fn::Join" : [ "", [ "C:\\cfn\\scripts\\IsDefined.cmd ", { "Ref" : "OptionalParam" } ]]},
+								"command" : { "Fn::Join" : [ "", [ 
+									"echo OptionalParam has value ", { "Ref" : "OptionalParam" }
+								]]},
+								"waitAfterCompletion" : "0"	
+							},
+														
+							"z-signal-completion" : { 
+								"command" : { "Fn::Join" : ["", [ "cfn-signal.exe -e 0 \"", { "Ref" : "WaitHandle" },"\"" ]] },
+								"waitAfterCompletion" : "0"
+							}					
+						}
+					}
+				}
+			},
+			"Properties": {
+			    "displayname" :  { "Ref" : "ServerName" },
+				"templateid" : {"Ref":"TemplateId"},
+				"serviceofferingid"   : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : {"Ref" : "ZoneId"},
+				"name" :  {"Ref" : "ServerName"},
+				"networkids" : {"Ref" : "NetworkId"},
+				"userdata"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+				"<script>",
+					"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+					"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+				   " -r WindowsServer ", "\n",
+				"</script>"
+				]]}}        
+			}
+		},
+
+		"WaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+
+		"WaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "WindowsServer",
+			"Properties" : {
+				"Handle" : {"Ref" : "WaitHandle"},
+				"Timeout" : "1800"
+			}
+		}  
+	},   
+	"Outputs" : {
+		"ServerId" : {
+			"Value" : { "Ref" : "WindowsServer" },
+			"Description" : "Windows Server Id"
+		},
+		"ServerPrivateIP" : {
+			"Value" : { "Fn::GetAtt" : [ "WindowsServer", "PrivateIp" ] },
+			"Description" : "WindowsServer Private IP address"
+		},
+		"ServerPrivateRoot" : {
+			"Value" : { "Fn::GetAtt" : [ "WindowsServer", "rootdeviceid" ] },
+			"Description" : "WindowsServer root volume id"
+		}
+	}
+}

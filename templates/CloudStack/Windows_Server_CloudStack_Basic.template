@@ -1,0 +1,99 @@
+{
+	"CSTemplateFormatVersion" : "1",
+  
+	"Description" : "CloudStack StackMate sample template: Create a single Windows server with WaitCondition signalled.",
+  
+	"Parameters" : {
+		"ZoneId":{
+			"Description":"ID of the zone to create stack",
+			"Type":"String"
+		},
+		"ServerName":{
+			"Description":"Name of the server",
+			"Type":"String"
+		},
+		"TemplateId":{
+			"Description":"ID of the VM template",
+			"Type":"String"
+		},
+		"ServiceOfferingId":{
+			"Description":"ID of the serviceoffering",
+			"Type":"String"
+		},
+		"SecurityGroupNames":{
+			"Description":"Comma separated names of the security groups to use",
+			"Type":"String",
+			"Default" : "default"
+        }		
+	},
+  
+	"Resources" : {     
+      
+		"WindowsServer": {  
+			"Type": "CloudStack::VirtualMachine",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"config" : {
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/2014-01-10/scripts.zip"						
+						},       
+						"commands" : {
+							"a-rename-computer" : {
+								"command" : { "Fn::Join" : [ "", [
+									 "C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ", { "Ref" : "ServerName" }
+								]]},
+								"waitAfterCompletion" : "forever"
+							},												
+							"z-signal-completion" : { 
+								"command" : { "Fn::Join" : ["", [ "cfn-signal.exe -e 0 \"", { "Ref" : "WaitHandle" },"\"" ]] },
+								"waitAfterCompletion" : "0"
+							}					
+						}
+					}
+				}
+			},
+			"Properties": {
+			    "displayname" :  { "Ref" : "ServerName" },
+				"templateid" : {"Ref":"TemplateId"},
+				"serviceofferingid"   : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : {"Ref" : "ZoneId"},
+				"name" :  {"Ref" : "ServerName"},
+				"securitygroupnames" : { "Ref" : "SecurityGroupNames" },
+				"userdata"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+				"<script>",
+					"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+					"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+				   " -r WindowsServer ", "\n",
+				"</script>"
+				]]}}        
+			}
+		},
+
+		"WaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+
+		"WaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "WindowsServer",
+			"Properties" : {
+				"Handle" : {"Ref" : "WaitHandle"},
+				"Timeout" : "1800"
+			}
+		}  
+	},   
+	"Outputs" : {
+		"ServerId" : {
+			"Value" : { "Ref" : "WindowsServer" },
+			"Description" : "Windows Server Id"
+		},
+		"ServerPrivateIP" : {
+			"Value" : { "Fn::GetAtt" : [ "WindowsServer", "PrivateIp" ] },
+			"Description" : "WindowsServer Private IP address"
+		},
+		"ServerPrivateRoot" : {
+			"Value" : { "Fn::GetAtt" : [ "WindowsServer", "rootdeviceid" ] },
+			"Description" : "WindowsServer root volume id"
+		}
+	}
+}

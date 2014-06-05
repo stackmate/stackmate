@@ -1,0 +1,137 @@
+{
+	"CSTemplateFormatVersion" : "1",
+
+	"Description" : "This template creates a standalone domain controller.",
+
+	"Parameters" : {
+		"ZoneId":{
+         "Description":"ID of the zone to create stack",
+         "Type":"String"
+      },
+		"ServerName":{
+         "Description":"Name of the server",
+         "Type":"String"
+      },
+		"TemplateId":{
+         "Description":"ID of the VM template",
+         "Type":"String"
+      },
+		"ServiceOfferingId":{
+         "Description":"ID of the serviceoffering",
+         "Type":"String"
+      },
+		"NetworkId":{
+         "Description":"ID of the network",
+         "Type":"String"
+      },	
+	  	"DomainDNSName" : {
+			"Description" : "Fully qualified domain name (FQDN) of the forest root domain e.g. corp.example.com",
+			"Type" : "String",
+			"AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+		},	
+		"AdminPassword" : {
+			"Description" : "Password for the administrator account",
+			"Type" : "String",
+			"Default" : "Citrix123",
+			"MinLength" : "8",
+			"MaxLength" : "32",
+			"NoEcho" : "True"
+		},
+		"KmsServerAddress" : {
+			"Description" : "IP address or DNS name of the KMS server (if required). A SRV record will be inserted in AD if specified",
+			"Type" : "String",
+			"Default" : ""
+		}
+	},
+
+	"Resources" : {
+	
+		"DomainController": {  
+			"Type" : "CloudStack::VirtualMachine",
+			"Metadata" : {
+				"AWS::CloudFormation::Init" : {          
+					"config" : {
+						"sources" : {
+							"C:\\cfn\\" : "https://s3.amazonaws.com/citrix-cloudworks/latest/scripts.zip" 
+						},          
+						"commands" : {												
+							"a-reset-password" : {
+								"command" :  { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\ResetLocalAccount.cmd -UserName Administrator -Password ",
+									{ "Ref" : "AdminPassword" }
+								]]},
+								"waitAfterCompletion" : "0"
+							},				  
+							"b-rename-computer" : {
+								"command" : { "Fn::Join" : [ "", [
+									 "C:\\cfn\\scripts\\RenameComputer.cmd -ComputerName ", { "Ref" : "ServerName" }
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+							"c-create-domain" : {
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\CreateDomain.cmd -DomainName ",
+									{ "Ref" : "DomainDNSName" },
+									" -SafeModePassword ",
+									{ "Ref" : "AdminPassword" }						
+								]]},
+								"waitAfterCompletion" : "forever"
+							},
+						    "d-add-kms-srv-record" : {
+								"test" : { "Fn::Join" : [ "", [ "C:\\cfn\\scripts\\IsDefined.cmd ", { "Ref" : "KmsServerAddress" } ]]},
+								"command" : { "Fn::Join" : [ "", [
+									"C:\\cfn\\scripts\\AddKmsServiceRecord.cmd -KmsServerAddress ", { "Ref" : "KmsServerAddress" }, " -Zone ", 	{ "Ref" : "DomainDNSName" }	
+								]]},
+								"waitAfterCompletion" : "0"
+							},							
+							"z-signal-completion" : { 
+								"command" : { "Fn::Join" : ["", [ "cfn-signal.exe -e 0 \"", { "Ref" : "WaitHandle" },"\"" ]] },
+								"waitAfterCompletion" : "0"
+							}					
+						}
+					}
+				}
+			},		
+      
+			"Properties": {
+			    "displayname" :  { "Fn::Join" : [ ".", [ { "Ref" : "ServerName" }, { "Ref" : "DomainDNSName" } ]]},
+				"templateid" : {"Ref":"TemplateId"},
+				"serviceofferingid"   : { "Ref" : "ServiceOfferingId" },
+				"zoneid" : {"Ref" : "ZoneId"},
+				"name" :  {"Ref" : "ServerName"},
+				"networkids" : {"Ref" : "NetworkId"},
+				"userdata"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+					"<script>",
+						"set StackMateApiUrl=", { "Ref": "CloudStack::StackMateApiURL" }, "\n",
+						"cfn-init.exe -v -s ", { "Ref" : "CloudStack::StackName" }, 
+						" -r DomainController ", "\n",
+					"</script>"
+				]]}}        				
+			}
+		},
+
+		"WaitHandle" : {
+			"Type" : "StackMate::WaitConditionHandle"
+		},
+
+		"WaitCondition" : {
+			"Type" : "StackMate::WaitCondition",
+			"DependsOn" : "DomainController",
+			"Properties" : {
+				"Handle" : {"Ref" : "WaitHandle"},
+				"Timeout" : "1800"
+			}
+		}
+    },
+
+	"Outputs" : {
+		"ServerId" : {
+			"Value" : { "Ref" : "DomainController" },
+			"Description" : "Domain Controller Id"
+		},
+		"PrivateIP" : {
+			"Value" : { "Fn::GetAtt" : [ "DomainController", "PrivateIp" ] },
+			"Description" : "Domain Controller private IP address"
+		}
+	}
+}
