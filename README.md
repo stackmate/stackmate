@@ -123,8 +123,9 @@ In addition a Windows Service "the cloudworks agent" has been written to process
 The source for these can be downloaded from https://github.com/siwater/Cloudworks (there is a Visual Studio solution which will build a single MSI to install both the cloduworks agent and the cfn tools onto a Windows platform). 
 
 ## StackMate Appliance
-If you don't fancy building Stackmate from source there is a pre-built Linux appliance (XVA format for XenServer) that you can download from URL-TBD to get you started quickly.
-This contains pre-installed Stackmate and Stacktician installations, with a set of sample templates to get you started. 
+If you don't fancy building Stackmate from source there is a pre-built Linux appliance (XVA format for XenServer) that you can download from 
+https://citrix.sharefile.com/d/s18212b9c23945549 to get you started quickly.
+This contains pre-installed Stackmate and Stacktician, with a set of sample templates to get you started. 
 Also contained in the distribution are the cloudworks MSI for installation on Windows images in CloudStack, and a document containing a step-by-step guide to using the appliance.
 
 ## Extending StackMate to other APIs
